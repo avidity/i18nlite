@@ -1,0 +1,14 @@
+---
+test_locale:
+  my:
+    key: 'My Key'
+    other: 'My Other'
+  array:
+    - Zero
+    - One
+    - Two
+    - Three
+my_locale:
+  my:
+    key: 'My Key (my_locale)'
+    other: 'My Other (my_locale)'
