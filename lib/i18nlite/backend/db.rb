@@ -7,6 +7,8 @@ module I18nLite
       include I18n::Backend::Flatten
       include I18nLite::Backend::ConsistentCache
 
+      attr_accessor :model
+
       def initialize(model)
         @model = model
         super()

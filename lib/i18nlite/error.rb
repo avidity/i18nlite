@@ -4,12 +4,20 @@ module I18nLite
     # I18n.exception_handler = PromoteI18n::RaiseTranslationMissingHandler.new
 
     class RaiseMissingHandler
+      def self.call(*args)
+        new.call(*args)
+      end
+
       def call(exception, locale, key, options)
         raise I18n::MissingTranslationData.new(locale, key, options)
       end
     end
 
     class RegisterMissingHandler
+      def self.call(*args)
+        new.call(*args)
+      end
+
       def call(exception, locale, key, options)
         exception = I18n::MissingTranslationData.new(locale, key, options)
         if defined? Promote::ExceptionReporter

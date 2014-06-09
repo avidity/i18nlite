@@ -1,8 +1,10 @@
 module I18nLite
   module Compat
     def method_missing(method, *args, &block)
-      Rails.logger.info("DEPRECATION WARNING: #{self}##{method} is deprecated in favour of #{compat_delegate_to}##{method} called at #{caller(0)[1]}")
-      compat_delegate_to.send(method, *args, &block)
+      klass = (self.instance_of?(Class)) ? self : self.class
+
+      Rails.logger.info("DEPRECATION WARNING: #{self}##{method} is deprecated in favour of #{klass.compat_delegate_to}##{method} called at #{caller(0)[1]}")
+      klass.compat_delegate_to.send(method, *args, &block)
     end
   end
 end
@@ -58,16 +60,20 @@ module PromoteI18n
   class RaiseTranslationMissingHandler
     include I18nLite::Compat
 
-    def self.compat_delegate_to
-      I18nLite::Error::RaiseMissingHandler
+    class << self
+      def compat_delegate_to
+        I18nLite::Error::RaiseMissingHandler
+      end
     end
   end
 
   class RegisterInExceptionalTranslationMissingHandler
     include I18nLite::Compat
 
-    def self.compat_delegate_to
-      I18nLite::Error::RegisterMissingHandler
+    class << self
+      def compat_delegate_to
+        I18nLite::Error::RegisterMissingHandler
+      end
     end
   end
 end

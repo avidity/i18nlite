@@ -21,6 +21,7 @@ describe I18nLite::Backend::DB do
     expect(I18n.backend).to be_an(I18n::Backend::Base)
     expect(I18n.backend).to be_an(I18n::Backend::Flatten)
     expect(I18n.backend).to be_an(I18nLite::Backend::ConsistentCache)
+    expect(I18n.backend.model).to be(TestTranslation)
   end
 
   context "Used as backend" do
