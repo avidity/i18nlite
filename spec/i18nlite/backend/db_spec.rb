@@ -184,36 +184,6 @@ describe I18nLite::Backend::DB do
     end
   end
 
-  context 'I18n extensions' do
-    it 'adds a new fallback_list property to I18n' do
-      expect(I18n.fallback_list).to be_an(Array)
-    end
-
-    it 'adds an immutable system locale' do
-      expect(I18n.system_locale).to be :system
-    end
-
-    context "fallback_list" do
-      it 'will automatically include locale in fallback chain' do
-        expect(I18n.fallback_list.first).to eq(I18n.locale)
-      end
-
-      it 'will automatically include configured system locale at the bottom' do
-        expect(I18n.fallback_list.last).to eq(I18n.system_locale)
-      end
-
-      it 'treat a nil fallback_list as an arry' do
-        I18n.fallback_list = nil
-        expect(I18n.fallback_list).to be_an(Array)
-      end
-
-      it 'treat a non-array fallback_list as an empty array' do
-        I18n.fallback_list = "blah"
-        expect(I18n.fallback_list).to be_an(Array)
-      end
-    end
-  end
-
   context 'lookup with fallbacks' do
     before(:each) do
       @original_fallbacks = I18n.fallback_list
@@ -258,6 +228,41 @@ describe I18nLite::Backend::DB do
       expect(I18n.t(:'how_many', count: 1)).to eq('En')
       expect(I18n.t(:'how_many', count: 2)).to eq('Flera')
       expect(I18n.t(:'how_many', count: 0)).to eq('Inga')
+    end
+  end
+
+  context 'all_expanded' do
+    it 'returns all keys expanded into a nested hash' do
+      TestTranslation.create(locale: :system, key: 'root.one.sub1', translation: 'Sub 1')
+      TestTranslation.create(locale: :system, key: 'root.one.sub2', translation: 'Sub 2')
+      TestTranslation.create(locale: :system, key: 'root.other', translation: 'Another translation')
+
+      expect(I18n.backend.all_expanded).to eq({
+        'root' => {
+          'one' => {
+            'sub1' => 'Sub 1',
+            'sub2' => 'Sub 2'
+          },
+          'other' => 'Another translation'
+        }
+      })
+    end
+
+    it 'applies fallback when returning keys' do
+      I18n.locale = :dummy
+
+      TestTranslation.create(locale: :system, key: 'root.one.sub1', translation: 'Sub 1')
+      TestTranslation.create(locale: :dummy, key: 'root.one.sub1', translation:  'OVERRIDE')
+      TestTranslation.create(locale: :system, key: 'root.one.sub2', translation: 'Sub 2')
+
+      expect(I18n.backend.all_expanded).to eq({
+        'root' => {
+          'one' => {
+            'sub1' => 'OVERRIDE',
+            'sub2' => 'Sub 2'
+          }
+        }
+      })
     end
   end
 end

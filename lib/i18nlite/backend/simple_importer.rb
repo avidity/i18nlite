@@ -5,7 +5,7 @@ module I18nLite
 
       def all_flattened(locale=I18n.locale)
         init_translations
-        flatten_translations(nil, translations[locale], false, false)
+        flatten_translations(nil, translations[locale], false, nil)
       end
     end
   end

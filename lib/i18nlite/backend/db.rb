@@ -60,6 +60,26 @@ module I18nLite
         @model.all_by_preference_fast(locales)
       end
 
+      def all_expanded
+        flattened = @model.all_by_preference_fast(locales)
+        expanded = {}
+
+        flattened.each {|long_key, value|
+          keys = long_key.to_s.split('.')
+          i    = 0
+
+          keys.reduce(expanded) {|hash_ref, key|
+            hash_ref[key] = if (i += 1) == keys.size
+              value
+            else
+              hash_ref[key] || {}
+            end
+          }
+        }
+
+        expanded
+      end
+
       protected
 
       def locales

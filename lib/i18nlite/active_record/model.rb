@@ -18,7 +18,7 @@ module I18nLite
         end
 
         def all_locales
-          self.select(:locale).distinct.pluck(:locale)
+          self.select(:locale).distinct.pluck(:locale).compact
         end
 
         def by_preference(key, locales)
