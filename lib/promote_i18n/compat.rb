@@ -1,7 +1,11 @@
 module I18nLite
   module Compat
     def method_missing(method, *args, &block)
-      klass = (self.instance_of?(Class)) ? self : self.class
+      klass = if self.instance_of?(Class) || self.instance_of?(Module)
+        self
+      else
+        self.class
+      end
 
       Rails.logger.info("DEPRECATION WARNING: #{self}##{method} is deprecated in favour of #{klass.compat_delegate_to}##{method} called at #{caller(0)[1]}")
       klass.compat_delegate_to.send(method, *args, &block)

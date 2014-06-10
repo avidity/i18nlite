@@ -10,6 +10,16 @@ module MyOriginalNamespace
   end
 end
 
+class MyOriginalClass
+  class << self
+    include I18nLite::Compat
+
+    def compat_delegate_to
+      MyNewClass
+    end
+  end
+end
+
 module MyNewImplementation
   class << self
     def some_method
@@ -25,6 +35,10 @@ module MyNewImplementation
   end
 end
 
+class MyNewClass
+  def self.my_class_method
+  end
+end
 
 describe I18nLite::Compat do
   before(:each) do
