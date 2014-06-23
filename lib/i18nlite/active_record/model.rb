@@ -7,6 +7,30 @@ module I18nLite
       end
 
       module ClassMethods
+
+
+        def fast_insert(translations)
+          existing_keys = where(key: translations.map {|t| t[:key]}, locale: translations.first[:locale]).pluck(:key)
+
+          # Weed out and ignore existing keys
+          translations.reject! {|t|
+            existing_keys.include?(t[:key].to_s)
+          }
+
+          ::ActiveRecord::Base.transaction do
+            # NOTE: I was under the impression that this statement would be smart an generate
+            # INSERT INTO ... (col1, col2, ...) VALUES
+            #  (row1, row1, ...)
+            #  (row2, row2, ...)
+            # but instead activecrecord just generates multiple inserts. We might want to change that
+            # for performance reasons
+
+            self.create(translations)
+          end
+
+          return translations.size
+        end
+
         def by_prefix(key, locale)
           where('key LIKE ? AND locale = ?', "#{key}.%", locale).order(:key)
         end
