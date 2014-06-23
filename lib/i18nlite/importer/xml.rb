@@ -4,7 +4,11 @@ module I18nLite
   module Importer
     class XML
       def initialize(xml)
-        @doc = Nokogiri::XML(xml)
+        @doc = Nokogiri::XML(xml) { |c|
+          c.strict
+        }
+
+        validate!
       end
 
       def import!
@@ -16,6 +20,16 @@ module I18nLite
       end
 
       private
+
+      def validate!
+        # FIXME: Perhaps we should just use a DTD instead? Or is that too much 1999?
+        raise XMLFormatError.new('invalid root tag, expected i18n') unless @doc.root.name == 'i18n'
+        raise XMLFormatError.new('require at least one string set to import') if @doc.xpath('//strings').count == 0
+        raise XMLFormatError.new('strings tag requires locale attribute') if @doc.xpath('//strings[not(@locale)]').count > 0
+        raise XMLFormatError.new('string tag requires key attribute') if @doc.xpath('//string[not(@key)]').count > 0
+        raise XMLFormatError.new('string tag at least one translation child') if @doc.xpath('//string[not(translation)]').count > 0
+        true
+      end
 
       def import_locale(locale, elements)
 
@@ -32,8 +46,12 @@ module I18nLite
           end
         end
 
-        I18n.store_translations(locale, translations)
+        I18n.backend.store_translations(locale, translations)
       end
+    end
+
+
+    class XMLFormatError < Exception
     end
   end
 end

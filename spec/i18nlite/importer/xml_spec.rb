@@ -6,7 +6,47 @@ describe I18nLite::Importer::XML do
     TestXmlData.get(name)
   end
 
-  context 'scan xml' do
+  context 'parse xml' do
+    it 'throws an exception if xml is invalid' do
+      expect {
+        I18nLite::Importer::XML.new('not xml')
+      }.to raise_error(Nokogiri::XML::SyntaxError)
+    end
+  end
+
+  context 'xml format validation' do
+    it 'requires the i18n root tag' do
+      expect {
+        I18nLite::Importer::XML.new(xml(:missing_root))
+      }.to raise_error(I18nLite::Importer::XMLFormatError)
+    end
+
+    it 'requires the at least one strings tag' do
+      expect {
+        I18nLite::Importer::XML.new(xml(:missing_strings))
+      }.to raise_error(I18nLite::Importer::XMLFormatError)
+    end
+
+    it 'strings tags requires a locale' do
+      expect {
+        I18nLite::Importer::XML.new(xml(:missing_locale))
+      }.to raise_error(I18nLite::Importer::XMLFormatError)
+    end
+
+    it 'string tags requires a key' do
+      expect {
+        I18nLite::Importer::XML.new(xml(:missing_key))
+      }.to raise_error(I18nLite::Importer::XMLFormatError)
+    end
+
+    it 'string tags requires at least one translation child' do
+      expect {
+        I18nLite::Importer::XML.new(xml(:missing_translation))
+      }.to raise_error(I18nLite::Importer::XMLFormatError)
+    end
+  end
+
+  context 'parsing' do
     it 'imports each locale separately' do
       importer = I18nLite::Importer::XML.new(xml(:two_locales))
 
@@ -18,7 +58,7 @@ describe I18nLite::Importer::XML do
     it 'invokes I18n#store_translations once per locale' do
       importer = I18nLite::Importer::XML.new(xml(:three_strings))
 
-      I18n.should_receive(:store_translations).with('sv', {
+      I18n.backend.should_receive(:store_translations).with('sv', {
         'site.welcome' => 'Välkommen',
         'site.bye' => 'Hejdå',
         'site.welcome_back' => 'Välkommen tillbaka'
@@ -29,7 +69,7 @@ describe I18nLite::Importer::XML do
     it 'supports arrays of strings' do
       importer = I18nLite::Importer::XML.new(xml(:array))
 
-      I18n.should_receive(:store_translations).with('sv', {
+      I18n.backend.should_receive(:store_translations).with('sv', {
         'site.things' => ['En', 'Två', 'Tre']
       })
       importer.import!
@@ -91,6 +131,48 @@ eoXML
         <strings locale="en">
           <string key="site.welcome">
             <translation>Welcome</translation>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    missing_root: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <strings locale="sv">
+        <string key="site.welcome">
+          <translation>Välkommen</translation>
+        </string>
+      </strings>
+eoXML
+    missing_strings: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+      </i18n>
+eoXML
+    missing_locale: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <strings>
+          <string key="site.welcome">
+            <translation>Välkommen</translation>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    missing_key: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <strings locale="sv">
+          <string>
+            <translation>Välkommen</translation>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    missing_translation: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <strings locale="sv">
+          <string key="site.welcome">
           </string>
         </strings>
       </i18n>
