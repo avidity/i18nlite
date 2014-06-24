@@ -8,13 +8,12 @@ module I18nLite
 
       module ClassMethods
 
-
-        def fast_insert(translations)
-          existing_keys = where(key: translations.map {|t| t[:key]}, locale: translations.first[:locale]).pluck(:key)
+        def insert_filtered(translations)
+          existing_keys = where(key: translations.map {|t| t[:key]}, locale: translations.first[:locale]).pluck(:key).map(&:to_sym)
 
           # Weed out and ignore existing keys
           translations.reject! {|t|
-            existing_keys.include?(t[:key].to_s)
+            existing_keys.include?(t[:key].to_sym)
           }
 
           ::ActiveRecord::Base.transaction do

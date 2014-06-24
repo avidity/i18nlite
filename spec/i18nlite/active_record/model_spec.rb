@@ -191,4 +191,33 @@ describe TestTranslation do
       ).to be_empty
     end
   end
+
+  context '::insert_filtered' do
+    it 'inserts given locales' do
+      expect {
+        TestTranslation.insert_filtered([
+          { locale: :system, key: 'my.key', translation: 'my translation' },
+          { locale: :system, key: 'my.new', translation: 'new translation' },
+        ])
+      }.to change {
+        TestTranslation.count()
+      }.from(0).to(2)
+    end
+
+    it 'ignores existing key/value pairs' do
+      TestTranslation.create({ locale: :system, key: 'my.key', translation: 'my translation' })
+      expect {
+        TestTranslation.insert_filtered([
+          { locale: :system, key: 'my.key', translation: 'my other translation' },
+          { locale: :system, key: 'my.new', translation: 'new translation' },
+        ])
+      }.to change {
+        TestTranslation.count()
+      }.from(1).to(2)
+
+      expect(
+        TestTranslation.find_by(locale: :system, key: 'my.key').translation
+      ).to eq('my translation')
+    end
+  end
 end
