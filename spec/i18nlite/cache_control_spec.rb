@@ -10,17 +10,17 @@ end
 describe I18nLite::CacheControl do
   context "can_clear_keys? method" do
     it "supports checking whether a keyed cache storage is present" do
-      I18nLite::CacheControl.respond_to?(:can_clear_keys?).should be_true
+      I18nLite::CacheControl.respond_to?(:can_clear_keys?).should be true
     end
 
     it "can clear keys if cache store is a memory store" do
       I18n.stub(:cache_store) { ActiveSupport::Cache::MemoryStore.new }
-      I18nLite::CacheControl.can_clear_keys?.should be_true
+      I18nLite::CacheControl.can_clear_keys?.should be true
     end
 
     it "cannot clear keys if cache store is the base store" do
       I18n.stub(:cache_store) { MyTest::FakeCacheStore.new }
-      I18nLite::CacheControl.can_clear_keys?.should be_false
+      I18nLite::CacheControl.can_clear_keys?.should be false
     end
   end
 

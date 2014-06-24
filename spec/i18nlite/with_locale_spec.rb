@@ -16,7 +16,7 @@ describe "I18nLite#with_locale" do
   end
 
   context :with_locale do
-    it { I18nLite.respond_to?(:with_locale).should be_true }
+    it { I18nLite.respond_to?(:with_locale).should be true }
 
     it "support setting a temporary program_locale" do
 
