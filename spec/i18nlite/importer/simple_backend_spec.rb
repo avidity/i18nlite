@@ -50,7 +50,7 @@ describe I18nLite::Importer::SimpleBackend do
 
       expect(
         translation_by_key('array').is_array()
-      ).to be_true
+      ).to be true
 
       expect(
         TestTranslation.by_prefix('array', locale).map {|t| t.translation }
