@@ -9,11 +9,8 @@ module I18nLite
       end
 
       def import!
-        existing_keys = @database_model.where(locale: @target_locale).pluck(:key).map(&:to_sym)
-        translations  = load_translations.reject {|k| existing_keys.include?(k) }
-
         db_backend = I18nLite::Backend::DB.new(@database_model)
-        db_backend.store_translations(@target_locale, translations)
+        db_backend.store_translations(@target_locale, load_translations)
       end
 
       def sync!
