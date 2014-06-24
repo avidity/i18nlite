@@ -40,7 +40,7 @@ module I18nLite
           end
         end
 
-        @model.insert_fast(translations)
+        @model.insert_filtered(translations)
       end
 
       def available_locales

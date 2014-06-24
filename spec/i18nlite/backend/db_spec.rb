@@ -182,6 +182,19 @@ describe I18nLite::Backend::DB do
       expect(I18n.t(:'root.nested.second')).to eq('Also a translation')
       expect(I18n.t(:'also_root')).to eq('Root!')
     end
+
+    it 'returns number of translations stored' do
+      expect(
+        I18n.backend.store_translations(:system, :'new.key' => 'my translation', :'other.new.key' => 'my other translation')
+      ).to eq(2)
+    end
+
+    it 'ignores existing key/locale pairs' do
+      I18n.backend.model.create(locale: :system, key: 'other.new.key', translation: 'my other translation')
+      expect(
+        I18n.backend.store_translations(:system, :'new.key' => 'my translation', :'other.new.key' => 'my other translation')
+      ).to eq(1)
+    end
   end
 
   context 'lookup with fallbacks' do

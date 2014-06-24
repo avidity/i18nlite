@@ -75,6 +75,20 @@ describe I18nLite::Importer::XML do
       importer.import!
     end
   end
+
+  context 'return values' do
+    it 'returns a hash with imported locales and numbers' do
+      importer = I18nLite::Importer::XML.new(xml(:two_locales))
+
+      importer.should_receive(:import_locale).with('sv', anything()).and_return(10)
+      importer.should_receive(:import_locale).with('en', anything()).and_return(5)
+
+      expect(importer.import!).to eq({
+        'sv' => 10,
+        'en' => 5
+      })
+    end
+  end
 end
 
 

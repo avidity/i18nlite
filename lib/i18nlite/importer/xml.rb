@@ -12,11 +12,15 @@ module I18nLite
       end
 
       def import!
+        imported = {}
+
         @doc.xpath("//strings").each do |element|
           locale = element.attribute('locale').value
 
-          import_locale(locale, element.xpath('./string'))
+          imported[locale] = import_locale(locale, element.xpath('./string'))
         end
+
+        return imported
       end
 
       private
