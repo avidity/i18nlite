@@ -122,5 +122,5 @@ DEPENDENCIES
   debugger
   i18nlite!
   pg
-  rspec-rails (~> 2.14)
+  rspec-rails (= 2.99)
   simplecov (~> 0.8.0)
