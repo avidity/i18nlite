@@ -10,24 +10,24 @@ end
 describe I18nLite::CacheControl do
   context "can_clear_keys? method" do
     it "supports checking whether a keyed cache storage is present" do
-      I18nLite::CacheControl.respond_to?(:can_clear_keys?).should be true
+      expect(I18nLite::CacheControl.respond_to?(:can_clear_keys?)).to be true
     end
 
     it "can clear keys if cache store is a memory store" do
       I18n.stub(:cache_store) { ActiveSupport::Cache::MemoryStore.new }
-      I18nLite::CacheControl.can_clear_keys?.should be true
+      expect(I18nLite::CacheControl.can_clear_keys?).to be true
     end
 
     it "cannot clear keys if cache store is the base store" do
       I18n.stub(:cache_store) { MyTest::FakeCacheStore.new }
-      I18nLite::CacheControl.can_clear_keys?.should be false
+      expect(I18nLite::CacheControl.can_clear_keys?).to be false
     end
   end
 
   context "adaptor" do
     it "finds adaptor based on I18n cache setting" do
       I18n.stub(:cache_store) { ActiveSupport::Cache::MemoryStore.new }
-      I18nLite::CacheControl.adaptor.should be_kind_of( I18nLite::KeyedCacheAdaptor::RegExp )
+      expect(I18nLite::CacheControl.adaptor).to be_kind_of( I18nLite::KeyedCacheAdaptor::RegExp )
     end
   end
 
@@ -37,14 +37,14 @@ describe I18nLite::CacheControl do
 
     it "calls the adaptor to get a pattern matching each key" do
       I18n.stub(:cache_store) { ActiveSupport::Cache::MemoryStore.new }
-      I18nLite::CacheControl.adaptor.should_receive(:scoped_pattern).with(key1)
-      I18nLite::CacheControl.adaptor.should_receive(:scoped_pattern).with(key2)
+      expect(I18nLite::CacheControl.adaptor).to receive(:scoped_pattern).with(key1)
+      expect(I18nLite::CacheControl.adaptor).to receive(:scoped_pattern).with(key2)
       I18nLite::CacheControl.clear_keys(key1, key2)
     end
 
     it "It defaults to invoking clear of the configured cache store" do
       cache = MyTest::FakeCacheStore.new
-      cache.should_receive(:clear)
+      expect(cache).to receive(:clear)
       I18n.stub(:cache_store) { cache }
       I18nLite::CacheControl.clear_keys(key1, key2)
     end
@@ -53,13 +53,13 @@ describe I18nLite::CacheControl do
   context "clear all" do
     it "calls the adaptor to get a pattern matching all i18n keys" do
       I18n.stub(:cache_store) { ActiveSupport::Cache::MemoryStore.new }
-      I18nLite::CacheControl.adaptor.should_receive(:greedy_pattern)
+      expect(I18nLite::CacheControl.adaptor).to receive(:greedy_pattern)
       I18nLite::CacheControl.clear_all
     end
 
     it "It defaults to invoking clear of the configured cache store" do
       cache = MyTest::FakeCacheStore.new
-      cache.should_receive(:clear)
+      expect(cache).to receive(:clear)
       I18n.stub(:cache_store) { cache }
       I18nLite::CacheControl.clear_all
     end
@@ -73,26 +73,26 @@ describe I18nLite::KeyedCacheAdaptor::Base do
     let(:store) { ActiveSupport::Cache::MemoryStore.new }
 
     it "returns an adaptor suitable to the give store" do
-      subject.adaptor_for( store  ).should be_instance_of( I18nLite::KeyedCacheAdaptor::RegExp )
+      expect(subject.adaptor_for( store  )).to be_instance_of( I18nLite::KeyedCacheAdaptor::RegExp )
     end
 
     it "caches the result for each class" do
-      subject.adaptor_for( store  ).should == subject.adaptor_for( store  )
-      subject.adaptor_for( store  ).should_not == subject.adaptor_for( ActiveSupport::Cache::NullStore.new  )
+      expect(subject.adaptor_for( store )).to eq subject.adaptor_for( store )
+      expect(subject.adaptor_for( store )).not_to eq subject.adaptor_for( ActiveSupport::Cache::NullStore.new )
     end
 
     it "returns instance of base class if no suitable adaptor is found" do
-      subject.adaptor_for( MyTest::FakeCacheStore.new  ).should be_instance_of( subject )
+      expect(subject.adaptor_for( MyTest::FakeCacheStore.new )).to be_instance_of( subject )
     end
   end
 
   context "RegExp store" do
     it "handles MemoryStore" do
-      subject.adaptor_for( ActiveSupport::Cache::MemoryStore.new  ).should be_instance_of( I18nLite::KeyedCacheAdaptor::RegExp )
+      expect(subject.adaptor_for( ActiveSupport::Cache::MemoryStore.new )).to be_instance_of( I18nLite::KeyedCacheAdaptor::RegExp )
     end
 
     it "handles FileStore" do
-      subject.adaptor_for( ActiveSupport::Cache::FileStore.new('temp')  ).should be_instance_of( I18nLite::KeyedCacheAdaptor::RegExp )
+      expect(subject.adaptor_for( ActiveSupport::Cache::FileStore.new('temp') )).to be_instance_of( I18nLite::KeyedCacheAdaptor::RegExp )
     end
   end
 end

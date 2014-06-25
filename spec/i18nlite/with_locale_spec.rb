@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe "I18nLite#with_locale" do
+describe I18nLite do
 
   before :each do
     @original_fallbacks = I18n.fallback_list
@@ -15,28 +15,28 @@ describe "I18nLite#with_locale" do
     I18n.locale        = @original_locale
   end
 
-  context :with_locale do
-    it { I18nLite.respond_to?(:with_locale).should be true }
+  it { is_expected.to respond_to(:with_locale) }
 
+  context :with_locale do
     it "support setting a temporary program_locale" do
 
       I18nLite.with_locale([:pt_BR, :fi, :en]) do
-        I18n.locale.should == :pt_BR
-        I18n.fallback_list.should == [:pt_BR, :fi, :en, :system]
+        expect(I18n.locale).to eq :pt_BR
+        expect(I18n.fallback_list).to eq [:pt_BR, :fi, :en, :system]
       end
 
-      I18n.locale.should == :de
-      I18n.fallback_list.should == [:de, :system]
+      expect(I18n.locale).to eq :de
+      expect(I18n.fallback_list).to eq [:de, :system]
     end
 
     it "accepts a single symbol as locale argument" do
       I18nLite.with_locale(:pt_BR) do
-        I18n.locale.should == :pt_BR
-        I18n.fallback_list.should == [:pt_BR, :system]
+        expect(I18n.locale).to eq :pt_BR
+        expect(I18n.fallback_list).to eq [:pt_BR, :system]
       end
 
-      I18n.locale.should == :de
-      I18n.fallback_list.should == [:de, :system]
+      expect(I18n.locale).to eq :de
+      expect(I18n.fallback_list).to eq [:de, :system]
     end
 
     it "switches back to original locale in the event of an exception" do
@@ -46,8 +46,8 @@ describe "I18nLite#with_locale" do
         end
       }.to raise_error(Exception)
 
-      I18n.locale.should == :de
-      I18n.fallback_list.should == [:de, :system]
+      expect(I18n.locale).to eq :de
+      expect(I18n.fallback_list).to eq [:de, :system]
     end
 
     it "returns the value of the last statement of the block" do
@@ -55,10 +55,10 @@ describe "I18nLite#with_locale" do
       locale = I18nLite.with_locale([:sv]) do
         I18n.locale
       end
-      locale.should == :sv
+      expect(locale).to eq :sv
 
-      I18n.locale.should == :de
-      I18n.fallback_list.should == [:de, :system]
+      expect(I18n.locale).to eq :de
+      expect(I18n.fallback_list).to eq [:de, :system]
     end
   end
 end

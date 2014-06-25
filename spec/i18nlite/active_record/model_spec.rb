@@ -3,7 +3,7 @@ require "spec_helper"
 # TestTranslation is defined in spec/active_record_helper.rb
 
 describe TestTranslation do
-  it { should be_kind_of I18nLite::ActiveRecord::Model }
+  it { is_expected.to be_kind_of I18nLite::ActiveRecord::Model }
 
   context '::all_locales' do
     it "retrieves an array of all locales" do

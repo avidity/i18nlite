@@ -50,15 +50,15 @@ describe I18nLite::Importer::XML do
     it 'imports each locale separately' do
       importer = I18nLite::Importer::XML.new(xml(:two_locales))
 
-      importer.should_receive(:import_locale).with('sv', anything())
-      importer.should_receive(:import_locale).with('en', anything())
+      expect(importer).to receive(:import_locale).with('sv', anything())
+      expect(importer).to receive(:import_locale).with('en', anything())
       importer.import!
     end
 
     it 'invokes I18n#store_translations once per locale' do
       importer = I18nLite::Importer::XML.new(xml(:three_strings))
 
-      I18n.backend.should_receive(:store_translations).with('sv', {
+      expect(I18n.backend).to receive(:store_translations).with('sv', {
         'site.welcome' => 'Välkommen',
         'site.bye' => 'Hejdå',
         'site.welcome_back' => 'Välkommen tillbaka'
@@ -69,7 +69,7 @@ describe I18nLite::Importer::XML do
     it 'supports arrays of strings' do
       importer = I18nLite::Importer::XML.new(xml(:array))
 
-      I18n.backend.should_receive(:store_translations).with('sv', {
+      expect(I18n.backend).to receive(:store_translations).with('sv', {
         'site.things' => ['En', 'Två', 'Tre']
       })
       importer.import!
@@ -80,8 +80,8 @@ describe I18nLite::Importer::XML do
     it 'returns a hash with imported locales and numbers' do
       importer = I18nLite::Importer::XML.new(xml(:two_locales))
 
-      importer.should_receive(:import_locale).with('sv', anything()).and_return(10)
-      importer.should_receive(:import_locale).with('en', anything()).and_return(5)
+      expect(importer).to receive(:import_locale).with('sv', anything()).and_return(10)
+      expect(importer).to receive(:import_locale).with('en', anything()).and_return(5)
 
       expect(importer.import!).to eq({
         'sv' => 10,

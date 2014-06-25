@@ -1,7 +1,7 @@
 require "spec_helper"
 
 describe I18nLite::Backend::SimpleImporter do
-  it { should be_kind_of I18n::Backend::Simple }
+  it { is_expected.to be_kind_of I18n::Backend::Simple }
 
   before(:each) do
     I18n.stub(:load_path).and_return([File.join(File.dirname(__FILE__), '..', '..', 'support', 'data', 'sample.yml')])

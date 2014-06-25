@@ -77,28 +77,28 @@ describe I18nLite::Compat do
 end
 
 describe PromoteI18n::CacheControl do
-  it { should be_a I18nLite::Compat }
+  it { is_expected.to be_a I18nLite::Compat }
   it 'should delegate to I18nLite' do
     expect(PromoteI18n::CacheControl.compat_delegate_to).to be I18nLite::CacheControl
   end
 end
 
 describe PromoteI18n do
-  it { should be_a I18nLite::Compat }
+  it { is_expected.to be_a I18nLite::Compat }
   it 'should delegate to I18nLite' do
     expect(PromoteI18n.compat_delegate_to).to be I18nLite
   end
 end
 
 describe PromoteI18n::RegisterInExceptionalTranslationMissingHandler do
-  it { should be_a I18nLite::Compat }
+  it { is_expected.to be_a I18nLite::Compat }
   it 'should delegate to I18nLite' do
     expect(PromoteI18n::RegisterInExceptionalTranslationMissingHandler.compat_delegate_to).to be I18nLite::Error::RegisterMissingHandler
   end
 end
 
 describe PromoteI18n::RaiseTranslationMissingHandler do
-  it { should be_a I18nLite::Compat }
+  it { is_expected.to be_a I18nLite::Compat }
   it 'should delegate to I18nLite' do
     expect(PromoteI18n::RaiseTranslationMissingHandler.compat_delegate_to).to be I18nLite::Error::RaiseMissingHandler
   end
