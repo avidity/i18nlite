@@ -9,6 +9,7 @@ require "i18nlite/cache_control"
 require "i18nlite/error"
 require "i18nlite/importer/xml"
 require "i18nlite/importer/simple_backend"
+require "i18nlite/exporter/xml"
 
 # All these 4 dependencies can go when compat is no longer needed
 require 'active_support/concern'
@@ -17,6 +18,7 @@ require 'rails'
 require "promote_i18n/compat"
 
 module I18nLite
+  VERSION='0.1'
 end
 
 module PromoteI18n

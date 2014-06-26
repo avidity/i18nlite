@@ -1,0 +1,185 @@
+require 'nokogiri'
+require 'date'
+
+module I18nLite
+  module Exporter
+    class XML
+
+      attr_accessor :version, :ref_locale, :locales
+
+      def initialize
+        @references = {}
+      end
+
+      def version
+        @version ||= "I18nLite v#{I18nLite::VERSION}"
+      end
+
+      def ref_locale
+        @ref_locale ||= I18n.system_locale
+      end
+
+      def locales
+        @locales ||= I18n.available_locales || []
+      end
+
+      def locales=(locales)
+        @locales = Array(locales).map(&:to_sym)
+      end
+
+      def include_reference?(locale)
+        return false if locale == ref_locale
+        return true
+      end
+
+      def export
+        diff = (locales + [ref_locale]) - (I18n.available_locales + [I18n.system_locale])
+        unless diff.empty?
+          raise I18nLite::Exporter::UnknownLocaleError.new(diff.join(', '))
+        end
+
+        builder = Nokogiri::XML::Builder.new do |xml|
+          xml.i18n(generated: get_date, version: version) {
+            locales.each do |locale|
+
+              attrs = { locale: locale }
+              attrs[:'reference-locale'] = ref_locale if include_reference? locale
+
+              xml.strings(attrs) {
+                I18n.backend.model.where(locale: locale).order(:key).each do |translation|
+                  next if translation.key =~ /\.\d+$/  # Skip root array elements
+
+                  if include_reference? locale
+                    ref_translation = get_reference(translation.key) or next  # Skip if there's no reference locale
+                  end
+
+                  xml.string(key: translation.key) {
+                    add_translation(translation, xml)
+
+                    if ref_translation.present?
+                      xml.reference {
+                        add_translation(ref_translation, xml)
+                      }
+                    end
+                  }
+                end
+              }
+            end
+          }
+        end
+
+        return builder.to_xml
+      end
+
+      private
+
+      def get_date
+        DateTime.now.iso8601
+      end
+
+      def add_translation(translation, xml)
+        if translation.is_array
+          I18n.backend.model.by_prefix(translation.key, translation.locale).each do |element|
+            xml.translation {
+              xml.cdata element.translation
+            }
+          end
+        else
+          xml.translation {
+            xml.cdata translation.translation
+          }
+        end
+      end
+
+      def get_reference(key)
+        if @references.empty?
+          I18n.backend.model.where(locale: ref_locale).each {|ref|
+            @references[ref.key] = ref
+          }
+        end
+        @references[key]
+      end
+    end
+
+    class UnknownLocaleError < Exception
+    end
+
+    class NotInUniverse < Exception
+    end
+  end
+end
+
+# EXAMPLE FORMAT (AS EXPORTED):
+#
+# <?xml version="1.0" encoding="utf-8"?>
+# <i18n generated="2014-05-17T13:10Z+02:00" version="v2.15">
+#   <strings locale="sv" reference-locale="system">
+#     <string key="date.day_names">
+#       <translation>Söndag</translation>
+#       <translation>Måndag</translation>
+#       <translation>Tisdag</translation>
+#       <translation>Onsdag</translation>
+#       <translation>Torsdag</translation>
+#       <translation>Fredag</translation>
+#       <translation>Lördag</translation>
+#       <reference>
+#         <translation>Sunday</translation>
+#         <translation>Monday</translation>
+#         <translation>Tueday</translation>
+#         <translation>Wednesday</translation>
+#         <translation>Thursday</translation>
+#         <translation>Friday</translation>
+#         <translation>Saturday</translation>
+#       <reference>
+#     </string>
+#     <string key="mailer.coach_approves.notify_coach_new_waiting_message.body">
+#       <translation><![CDATA[
+#           Hej %{coach_first_name},
+#
+#           %{participant_name}, för vem du är coach, har klarmarkerat en uppgift som kräver ditt godkännande.
+#           Du kan välja att godkänna uppgiften, eller att efterfråga ytterligare information från deltagaren.
+#
+#           För att se %{participant_first_name_s} svar för uppgiften "%{activity_title}", följ följande länk:
+#           %{activity_url}
+#       ]]></translation>
+#       <reference>
+#         <translation><![CDATA[
+#           Hello %{coach_first_name},
+#
+#           %{participant_name}, for whom you are coach, has completed an assignment that requires your approval.
+#           You can choose to approve the assignment or request additional information.
+#
+#           To review the %{participant_first_name_s} answer for the assignment ”%{activity_title}”, please follow this link:
+#           %{activity_url}
+#       ]]></translation>
+#       <reference>
+#     </string>
+#   </strings>
+# </i18n>
+#
+# EXAMPLE FORMAT (SIMPLE):
+# <?xml version="1.0" encoding="utf-8"?>
+# <i18n>
+#   <strings locale="sv">
+#     <string key="date.day_names">
+#       <translation>Söndag</translation>
+#       <translation>Måndag</translation>
+#       <translation>Tisdag</translation>
+#       <translation>Onsdag</translation>
+#       <translation>Torsdag</translation>
+#       <translation>Fredag</translation>
+#       <translation>Lördag</translation>
+#     </string>
+#     <string key="mailer.coach_approves.notify_coach_new_waiting_message.body">
+#       <translation><![CDATA[
+#           Hej %{coach_first_name},
+#
+#           %{participant_name}, för vem du är coach, har klarmarkerat en uppgift som kräver ditt godkännande.
+#           Du kan välja att godkänna uppgiften, eller att efterfråga ytterligare information från deltagaren.
+#
+#           För att se %{participant_first_name_s} svar för uppgiften "%{activity_title}", följ följande länk:
+#           %{activity_url}
+#       ]]></translation>
+#     </string>
+#   </strings>
+# </i18n>
