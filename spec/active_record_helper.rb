@@ -2,9 +2,9 @@ require 'active_record'
 
 ActiveRecord::Base.establish_connection(
   :adapter  => "postgresql",
-  :database => "i18nlite_test",
-  :username => "i18nlite_test",
-  :password => "i18nlite_test"
+  :database => ENV.fetch('I18NLITE_DB_NAME', 'i18nlite_test'),
+  :username => ENV.fetch('I18NLITE_DB_USER', 'i18nlite_test'),
+  :password => ENV.fetch('I18NLITE_DB_PASS', 'i18nlite_test')
 )
 
 ActiveRecord::Schema.define do
