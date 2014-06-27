@@ -7,6 +7,7 @@ require 'i18nlite/active_record/model'
 require "i18nlite/with_locale"
 require "i18nlite/cache_control"
 require "i18nlite/error"
+require "i18nlite/version"
 require "i18nlite/importer/xml"
 require "i18nlite/importer/simple_backend"
 require "i18nlite/exporter/xml"
@@ -18,7 +19,6 @@ require 'rails'
 require "promote_i18n/compat"
 
 module I18nLite
-  VERSION='0.1'
 end
 
 module PromoteI18n
