@@ -17,21 +17,21 @@ describe I18nLite::Importer::SimpleBackend do
   context 'initialization' do
     it 'requires a database model' do
       importer = I18nLite::Importer::SimpleBackend.new(TestTranslation, :my_src, :my_trg)
-      expect(importer.instance_variable_get(:@database_model)).to be TestTranslation
+      expect(importer.model).to be TestTranslation
     end
 
     it 'accepts source and target locales' do
       importer = I18nLite::Importer::SimpleBackend.new(TestTranslation, :my_src, :my_trg)
 
-      expect(importer.instance_variable_get(:@source_locale)).to be :my_src
-      expect(importer.instance_variable_get(:@target_locale)).to be :my_trg
+      expect(importer.source_locale).to be :my_src
+      expect(importer.target_locale).to be :my_trg
     end
 
     it 'sets target locale to I18n.system_locale by default' do
       importer = I18nLite::Importer::SimpleBackend.new(TestTranslation, :my_src)
 
-      expect(importer.instance_variable_get(:@source_locale)).to be :my_src
-      expect(importer.instance_variable_get(:@target_locale)).to be I18n.system_locale
+      expect(importer.source_locale).to be :my_src
+      expect(importer.target_locale).to be I18n.system_locale
       expect(I18n.system_locale).to_not be_nil
     end
   end
