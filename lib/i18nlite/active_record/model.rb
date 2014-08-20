@@ -1,19 +1,20 @@
 module I18nLite
   module ActiveRecord
     module Model
-
       def self.included(model)
         model.extend ClassMethods
       end
 
       module ClassMethods
 
-        def insert_filtered(translations)
-          existing_keys = where(key: translations.map {|t| t[:key]}, locale: translations.first[:locale]).pluck(:key).map(&:to_sym)
+        def insert_or_update(translations)
+          locales = translations.map {|t| t[:locale].to_sym }.uniq
+          raise MultipleLocalesError.new if locales.size > 1
 
-          # Weed out and ignore existing keys
-          translations.reject! {|t|
-            existing_keys.include?(t[:key].to_sym)
+          existing_keys = where(key: translations.map {|t| t[:key]}, locale: locales.first).pluck(:key).map(&:to_sym)
+
+          to_update, to_insert = translations.partition {|t|
+            existing_keys.include? t[:key].to_sym
           }
 
           ::ActiveRecord::Base.transaction do
@@ -23,8 +24,16 @@ module I18nLite
             #  (row2, row2, ...)
             # but instead activecrecord just generates multiple inserts. We might want to change that
             # for performance reasons
+            self.create(to_insert)
 
-            self.create(translations)
+            to_update.each do |t|
+              where(
+                key:    t[:key],
+                locale: t[:locale]
+              ).update_all(
+                translation: t[:translation]
+              )
+            end
           end
 
           return translations.size
@@ -126,6 +135,9 @@ module I18nLite
         end
       end
 
+      class MultipleLocalesError < Exception
+      end
     end
   end
 end
+

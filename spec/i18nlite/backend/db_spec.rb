@@ -189,11 +189,13 @@ describe I18nLite::Backend::DB do
       ).to eq(2)
     end
 
-    it 'ignores existing key/locale pairs' do
+    it 'updates existing keys' do
       I18n.backend.model.create(locale: :system, key: 'other.new.key', translation: 'my other translation')
       expect(
-        I18n.backend.store_translations(:system, :'new.key' => 'my translation', :'other.new.key' => 'my other translation')
-      ).to eq(1)
+        I18n.backend.store_translations(:system, :'new.key' => 'my translation', :'other.new.key' => 'updated translation')
+      ).to eq(2)
+
+      expect(I18n.t(:'other.new.key')).to eq('updated translation')
     end
   end
 

@@ -65,14 +65,14 @@ describe I18nLite::Importer::SimpleBackend do
       ).to eq ['array', 'array.0', 'array.1', 'array.2', 'array.3', 'my.key', 'my.other']
     end
 
-    it 'ignores existing keys' do
+    it 'updates existing keys' do
       TestTranslation.create(locale: locale, key: 'my.key', translation: 'only in database')
 
       expect {
         importer.import!
-      }.to_not change {
+      }.to change {
         translation_by_key('my.key').reload.translation
-      }
+      }.from('only in database').to('My Key')
     end
   end
 

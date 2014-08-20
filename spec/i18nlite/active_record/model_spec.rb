@@ -192,10 +192,10 @@ describe TestTranslation do
     end
   end
 
-  context '::insert_filtered' do
+  context '::insert_or_update' do
     it 'inserts given locales' do
       expect {
-        TestTranslation.insert_filtered([
+        TestTranslation.insert_or_update([
           { locale: :system, key: 'my.key', translation: 'my translation' },
           { locale: :system, key: 'my.new', translation: 'new translation' },
         ])
@@ -204,20 +204,40 @@ describe TestTranslation do
       }.from(0).to(2)
     end
 
-    it 'ignores existing key/value pairs' do
+    it 'inserts non existing keys for locale' do
       TestTranslation.create({ locale: :system, key: 'my.key', translation: 'my translation' })
       expect {
-        TestTranslation.insert_filtered([
+        TestTranslation.insert_or_update([
           { locale: :system, key: 'my.key', translation: 'my other translation' },
           { locale: :system, key: 'my.new', translation: 'new translation' },
         ])
       }.to change {
         TestTranslation.count()
       }.from(1).to(2)
+    end
+
+    it 'updates existing keys for locale' do
+      TestTranslation.create({ locale: :system, key: 'my.key', translation: 'my translation' })
+      expect {
+        TestTranslation.insert_or_update([
+          { locale: :system, key: 'my.key', translation: 'my updated translation' },
+        ])
+      }.not_to change {
+        TestTranslation.count()
+      }
 
       expect(
         TestTranslation.find_by(locale: :system, key: 'my.key').translation
-      ).to eq('my translation')
+      ).to eq('my updated translation')
+    end
+
+    it 'will not accept multiple locales per dataset' do
+      expect {
+        TestTranslation.insert_or_update([
+          { locale: :system1, key: 'my.key', translation: 'my updated translation' },
+          { locale: :system2, key: 'my.key', translation: 'my updated translation' }
+        ])
+      }.to raise_error(I18nLite::ActiveRecord::Model::MultipleLocalesError)
     end
   end
 end
