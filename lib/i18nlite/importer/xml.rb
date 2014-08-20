@@ -44,9 +44,9 @@ module I18nLite
           translation_values = element.xpath('./translation/text()')
 
           translations[key] = if translation_values.size == 1
-            translation_values.first.to_s
+            translation_values.first.content
           else
-            translation_values.map {|v| v.to_s }
+            translation_values.map {|v| v.content }
           end
         end
 
