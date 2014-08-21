@@ -32,7 +32,7 @@ module I18nLite
         return true
       end
 
-      def export
+      def export(dataset_name=:existing)
         diff = (locales + [ref_locale]) - (I18n.available_locales + [I18n.system_locale])
         unless diff.empty?
           raise I18nLite::Exporter::UnknownLocaleError.new(diff.join(', '))
@@ -46,7 +46,8 @@ module I18nLite
               attrs[:'reference-locale'] = ref_locale if include_reference? locale
 
               xml.strings(attrs) {
-                I18n.backend.model.where(locale: locale).order(:key).each do |translation|
+
+                dataset(dataset_name, locale).order(:key).each do |translation|
                   next if translation.key =~ /\.\d+$/  # Skip root array elements
 
                   if include_reference? locale
@@ -72,6 +73,28 @@ module I18nLite
       end
 
       private
+
+      def dataset(name, locale)
+        begin
+          self.send(:"dataset_#{name}", locale)
+        rescue NoMethodError
+          raise UnknownDatasetError.new(name)
+        end
+      end
+
+      def dataset_untranslated(locale)
+        raise NoReferenceLocaleError.new unless ref_locale.present?
+
+        I18n.backend.model.where(
+          'locale = ? AND key NOT IN(?)',
+          ref_locale,
+          I18n.backend.model.where(locale: locale).pluck(:key)
+        )
+      end
+
+      def dataset_existing(locale)
+        I18n.backend.model.where(locale: locale)
+      end
 
       def get_date
         DateTime.now.iso8601
@@ -104,7 +127,10 @@ module I18nLite
     class UnknownLocaleError < Exception
     end
 
-    class NotInUniverse < Exception
+    class UnknownDatasetError < Exception
+    end
+
+    class NoReferenceLocaleError < Exception
     end
   end
 end

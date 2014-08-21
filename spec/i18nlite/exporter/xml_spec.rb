@@ -51,6 +51,51 @@ describe I18nLite::Exporter::XML do
     end
   end
 
+  context 'datasets' do
+    before(:each) do
+      exporter.locales = :en
+    end
+    it 'exports existing translations by default' do
+      expect(exporter).to receive(:dataset_existing).with(:en).and_call_original
+      exporter.export
+    end
+
+    it 'can select other supported dataset' do
+      expect(exporter).to receive(:dataset_untranslated).with(:en).and_call_original
+      exporter.export(:untranslated)
+    end
+
+    it 'requires an implemented dataset' do
+      expect {
+        exporter.export(:_invalid_)
+      }.to raise_error(I18nLite::Exporter::UnknownDatasetError)
+    end
+  end
+
+  context 'untranslated dataset' do
+    before(:each) do
+      exporter.locales = :en
+      exporter.ref_locale = :system
+    end
+
+    it 'exports translations only in reference locale' do
+      I18n.backend.store_translations(:system, {
+        'my.key.a' => 'my key a system',
+        'my.key.b' => 'my key b system',
+        'my.key.c' => 'my key c system',
+      })
+      I18n.backend.store_translations(:en, {
+        'my.key.a' => 'my key a en',
+      })
+
+      xml = exporter.export(:untranslated)
+
+      expect(xml).not_to have_translation('en', 'my.key.a', 'my key a en')
+      expect(xml).to have_translation('en', 'my.key.b', 'my key b system')
+      expect(xml).to have_translation('en', 'my.key.c', 'my key c system')
+    end
+  end
+
   context '/i18n' do
     it 'exports current date' do
       date = "2014-06-25T09:12:12Z-0300"
@@ -153,7 +198,7 @@ describe I18nLite::Exporter::XML do
       expect(xml).not_to have_translation('en', 'my.key.c', 'my key c en')
     end
 
-    it 'does not include reference locale its specified as locale' do
+    it 'does not include reference locale if reference is same as locale' do
       exporter.locales = :en
       exporter.ref_locale = :en
 
