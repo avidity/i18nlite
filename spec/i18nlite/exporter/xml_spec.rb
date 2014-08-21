@@ -91,8 +91,10 @@ describe I18nLite::Exporter::XML do
       xml = exporter.export(:untranslated)
 
       expect(xml).not_to have_translation('en', 'my.key.a', 'my key a en')
-      expect(xml).to have_translation('en', 'my.key.b', 'my key b system')
-      expect(xml).to have_translation('en', 'my.key.c', 'my key c system')
+      expect(xml).to have_translation('en', 'my.key.b', '')
+      expect(xml).to have_reference('en', 'my.key.b', 'my key b system')
+      expect(xml).to have_translation('en', 'my.key.c', '')
+      expect(xml).to have_reference('en', 'my.key.c', 'my key c system')
     end
   end
 
@@ -150,6 +152,30 @@ describe I18nLite::Exporter::XML do
         'my.key.a' => 'my key a sv',
         'my.key.c' => 'my key c sv',
       })
+    end
+
+    it 'wraps translation content in cdata elements' do
+      exporter.locales = :en
+      xml = exporter.export
+      doc = Nokogiri::XML(xml)
+
+      expect(
+        doc.xpath("//strings[@locale='en']/string[@key='my.key.a']/translation/text()").first
+      ).to be_kind_of(Nokogiri::XML::CDATA)
+    end
+
+    it 'wrapes does not use cdata for empty elements' do
+      I18n.backend.store_translations(:en, {
+        'my.key.a' => ''
+      })
+
+      exporter.locales = :en
+      xml = exporter.export
+      doc = Nokogiri::XML(xml)
+
+      expect(
+        doc.xpath("//strings[@locale='en']/string[@key='my.key.a']/translation/text()").first
+      ).to be_nil
     end
 
     it 'includes translations and references for given locales' do

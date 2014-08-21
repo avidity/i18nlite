@@ -55,6 +55,8 @@ module I18nLite
                   end
 
                   xml.string(key: translation.key) {
+                    translation.translation = '' if dataset_name == :untranslated
+
                     add_translation(translation, xml)
 
                     if ref_translation.present?
@@ -103,15 +105,21 @@ module I18nLite
       def add_translation(translation, xml)
         if translation.is_array
           I18n.backend.model.by_prefix(translation.key, translation.locale).each do |element|
-            xml.translation {
-              xml.cdata element.translation
-            }
+            add_content(element, xml)
           end
         else
-          xml.translation {
-            xml.cdata translation.translation
-          }
+          add_content(translation, xml)
         end
+      end
+
+      def add_content(translation, xml)
+        xml.translation {
+          if translation.translation.present?
+            xml.cdata translation.translation
+          else
+            xml.text ''
+          end
+        }
       end
 
       def get_reference(key)
