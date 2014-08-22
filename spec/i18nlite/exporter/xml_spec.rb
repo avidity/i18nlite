@@ -55,14 +55,21 @@ describe I18nLite::Exporter::XML do
     before(:each) do
       exporter.locales = :en
     end
-    it 'exports existing translations by default' do
-      expect(exporter).to receive(:dataset_existing).with(:en).and_call_original
+    it 'defaults to the existing dataset' do
+      expect(I18n.backend.model).to receive(:existing).with(:en).and_call_original
       exporter.export
     end
 
-    it 'can select other supported dataset' do
-      expect(exporter).to receive(:dataset_untranslated).with(:en).and_call_original
-      exporter.export(:untranslated)
+    it 'supports the existing dataset' do
+      expect {
+        exporter.export(:existing)
+      }.not_to raise_error
+    end
+
+    it 'supports the untranslated dataset' do
+      expect {
+        exporter.export(:untranslated)
+      }.not_to raise_error
     end
 
     it 'requires an implemented dataset' do

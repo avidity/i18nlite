@@ -77,25 +77,8 @@ module I18nLite
       private
 
       def dataset(name, locale)
-        begin
-          self.send(:"dataset_#{name}", locale)
-        rescue NoMethodError
-          raise UnknownDatasetError.new(name)
-        end
-      end
-
-      def dataset_untranslated(locale)
-        raise NoReferenceLocaleError.new unless ref_locale.present?
-
-        I18n.backend.model.where(
-          'locale = ? AND key NOT IN(?)',
-          ref_locale,
-          I18n.backend.model.where(locale: locale).pluck(:key)
-        )
-      end
-
-      def dataset_existing(locale)
-        I18n.backend.model.where(locale: locale)
+        raise UnknownDatasetError.new(name) unless [:untranslated, :existing].include?(name)
+        I18n.backend.model.send(name, locale)
       end
 
       def get_date

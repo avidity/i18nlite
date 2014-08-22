@@ -8,7 +8,7 @@ module I18nLite
         }
 
         model.scope :untranslated, ->(locale) {
-          model.where('locale ? AND key NOT IN(?)', model.existing(locale).pluck(:key))
+          model.where('locale = ? AND key NOT IN(?)', I18n.system_locale, model.existing(locale).pluck(:key))
         }
 
         model.extend ClassMethods

@@ -192,6 +192,27 @@ describe TestTranslation do
     end
   end
 
+  context 'existing scope' do
+    it 'returns all existing translations for the locale' do
+      t1 = TestTranslation.create(locale: 'my_locale', key: 'my.key')
+      t2 = TestTranslation.create(locale: 'my_locale', key: 'my.other.key')
+      t3 = TestTranslation.create(locale: 'other_locale', key: 'other.key')
+
+      TestTranslation.existing('my_locale').to_a.should =~ [t1, t2]
+    end
+  end
+
+  context 'untranslated scope' do
+    it 'returns all translations in universe for keys that are not present in given locale' do
+      t1 = TestTranslation.create(locale: I18n.system_locale, key: 'my.key')
+      t2 = TestTranslation.create(locale: I18n.system_locale, key: 'my.other.key')
+      t3 = TestTranslation.create(locale: 'my_locale', key: 'my.other.key')
+      t4 = TestTranslation.create(locale: 'other_locale', key: 'my.key')
+
+      expect(TestTranslation.untranslated('my_locale')).to eq [t1]
+    end
+  end
+
   context '::insert_or_update' do
     it 'inserts given locales' do
       expect {
