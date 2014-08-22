@@ -2,20 +2,22 @@ module I18nLite
   module ActiveRecord
     module Model
       def self.included(model)
+
+        model.scope :existing, ->(locale) {
+          model.where(locale: locale)
+        }
+
+        model.scope :untranslated, ->(locale) {
+          model.where('locale ? AND key NOT IN(?)', model.existing(locale).pluck(:key))
+        }
+
         model.extend ClassMethods
       end
 
       module ClassMethods
 
         def insert_or_update(translations)
-          locales = translations.map {|t| t[:locale].to_sym }.uniq
-          raise MultipleLocalesError.new if locales.size > 1
-
-          existing_keys = where(key: translations.map {|t| t[:key]}, locale: locales.first).pluck(:key).map(&:to_sym)
-
-          to_update, to_insert = translations.partition {|t|
-            existing_keys.include? t[:key].to_sym
-          }
+          to_update, to_insert = partition_on_keys(translations)
 
           ::ActiveRecord::Base.transaction do
             # NOTE: I was under the impression that this statement would be smart an generate
@@ -88,6 +90,18 @@ module I18nLite
         end
 
         private
+
+        def partition_on_keys(translations)
+          locale = translations.first[:locale]
+          raise MultipleLocalesError.new if translations.find {|t| t[:locale] != locale}
+
+          existing_keys = existing(locale).pluck(:key).map(&:to_sym)
+
+          translations.partition {|t|
+            existing_keys.include? t[:key].to_sym
+          }
+        end
+
 
         def coalece_query(locales, options={})
 
