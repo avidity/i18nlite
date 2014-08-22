@@ -74,6 +74,15 @@ describe I18nLite::Importer::XML do
       })
       importer.import!
     end
+
+    it 'handles cdata sections correctly' do
+      importer = I18nLite::Importer::XML.new(xml(:cdata))
+
+      expect(I18n.backend).to receive(:store_translations).with('sv', {
+        'site.welcome' => 'Välkommen <b>hit</b>!'
+      })
+      importer.import!
+    end
   end
 
   context 'return values' do
@@ -130,6 +139,16 @@ eoXML
         <strings locale="sv">
           <string key="site.welcome">
             <translation>Välkommen</translation>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    cdata: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <strings locale="sv">
+          <string key="site.welcome">
+            <translation><![CDATA[Välkommen <b>hit</b>!]]></translation>
           </string>
         </strings>
       </i18n>

@@ -1,20 +1,23 @@
 module I18nLite
   module ActiveRecord
     module Model
-
       def self.included(model)
+
+        model.scope :existing, ->(locale) {
+          model.where(locale: locale)
+        }
+
+        model.scope :untranslated, ->(locale) {
+          model.where('locale = ? AND key NOT IN(?)', I18n.system_locale, model.existing(locale).pluck(:key))
+        }
+
         model.extend ClassMethods
       end
 
       module ClassMethods
 
-        def insert_filtered(translations)
-          existing_keys = where(key: translations.map {|t| t[:key]}, locale: translations.first[:locale]).pluck(:key).map(&:to_sym)
-
-          # Weed out and ignore existing keys
-          translations.reject! {|t|
-            existing_keys.include?(t[:key].to_sym)
-          }
+        def insert_or_update(translations)
+          to_update, to_insert = partition_on_keys(translations)
 
           ::ActiveRecord::Base.transaction do
             # NOTE: I was under the impression that this statement would be smart an generate
@@ -23,8 +26,16 @@ module I18nLite
             #  (row2, row2, ...)
             # but instead activecrecord just generates multiple inserts. We might want to change that
             # for performance reasons
+            self.create(to_insert)
 
-            self.create(translations)
+            to_update.each do |t|
+              where(
+                key:    t[:key],
+                locale: t[:locale]
+              ).update_all(
+                translation: t[:translation]
+              )
+            end
           end
 
           return translations.size
@@ -80,6 +91,18 @@ module I18nLite
 
         private
 
+        def partition_on_keys(translations)
+          locale = translations.first[:locale]
+          raise MultipleLocalesError.new if translations.find {|t| t[:locale] != locale}
+
+          existing_keys = existing(locale).pluck(:key).map(&:to_sym)
+
+          translations.partition {|t|
+            existing_keys.include? t[:key].to_sym
+          }
+        end
+
+
         def coalece_query(locales, options={})
 
           # FIXME 1: Require locales to be at least two elements in length'
@@ -126,6 +149,9 @@ module I18nLite
         end
       end
 
+      class MultipleLocalesError < Exception
+      end
     end
   end
 end
+

@@ -192,10 +192,31 @@ describe TestTranslation do
     end
   end
 
-  context '::insert_filtered' do
+  context 'existing scope' do
+    it 'returns all existing translations for the locale' do
+      t1 = TestTranslation.create(locale: 'my_locale', key: 'my.key')
+      t2 = TestTranslation.create(locale: 'my_locale', key: 'my.other.key')
+      t3 = TestTranslation.create(locale: 'other_locale', key: 'other.key')
+
+      TestTranslation.existing('my_locale').to_a.should =~ [t1, t2]
+    end
+  end
+
+  context 'untranslated scope' do
+    it 'returns all translations in universe for keys that are not present in given locale' do
+      t1 = TestTranslation.create(locale: I18n.system_locale, key: 'my.key')
+      t2 = TestTranslation.create(locale: I18n.system_locale, key: 'my.other.key')
+      t3 = TestTranslation.create(locale: 'my_locale', key: 'my.other.key')
+      t4 = TestTranslation.create(locale: 'other_locale', key: 'my.key')
+
+      expect(TestTranslation.untranslated('my_locale')).to eq [t1]
+    end
+  end
+
+  context '::insert_or_update' do
     it 'inserts given locales' do
       expect {
-        TestTranslation.insert_filtered([
+        TestTranslation.insert_or_update([
           { locale: :system, key: 'my.key', translation: 'my translation' },
           { locale: :system, key: 'my.new', translation: 'new translation' },
         ])
@@ -204,20 +225,40 @@ describe TestTranslation do
       }.from(0).to(2)
     end
 
-    it 'ignores existing key/value pairs' do
+    it 'inserts non existing keys for locale' do
       TestTranslation.create({ locale: :system, key: 'my.key', translation: 'my translation' })
       expect {
-        TestTranslation.insert_filtered([
+        TestTranslation.insert_or_update([
           { locale: :system, key: 'my.key', translation: 'my other translation' },
           { locale: :system, key: 'my.new', translation: 'new translation' },
         ])
       }.to change {
         TestTranslation.count()
       }.from(1).to(2)
+    end
+
+    it 'updates existing keys for locale' do
+      TestTranslation.create({ locale: :system, key: 'my.key', translation: 'my translation' })
+      expect {
+        TestTranslation.insert_or_update([
+          { locale: :system, key: 'my.key', translation: 'my updated translation' },
+        ])
+      }.not_to change {
+        TestTranslation.count()
+      }
 
       expect(
         TestTranslation.find_by(locale: :system, key: 'my.key').translation
-      ).to eq('my translation')
+      ).to eq('my updated translation')
+    end
+
+    it 'will not accept multiple locales per dataset' do
+      expect {
+        TestTranslation.insert_or_update([
+          { locale: :system1, key: 'my.key', translation: 'my updated translation' },
+          { locale: :system2, key: 'my.key', translation: 'my updated translation' }
+        ])
+      }.to raise_error(I18nLite::ActiveRecord::Model::MultipleLocalesError)
     end
   end
 end

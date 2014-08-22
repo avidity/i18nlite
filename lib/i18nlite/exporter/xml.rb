@@ -32,7 +32,7 @@ module I18nLite
         return true
       end
 
-      def export
+      def export(dataset_name=:existing)
         diff = (locales + [ref_locale]) - (I18n.available_locales + [I18n.system_locale])
         unless diff.empty?
           raise I18nLite::Exporter::UnknownLocaleError.new(diff.join(', '))
@@ -46,7 +46,8 @@ module I18nLite
               attrs[:'reference-locale'] = ref_locale if include_reference? locale
 
               xml.strings(attrs) {
-                I18n.backend.model.where(locale: locale).order(:key).each do |translation|
+
+                dataset(dataset_name, locale).order(:key).each do |translation|
                   next if translation.key =~ /\.\d+$/  # Skip root array elements
 
                   if include_reference? locale
@@ -54,6 +55,8 @@ module I18nLite
                   end
 
                   xml.string(key: translation.key) {
+                    translation.translation = '' if dataset_name == :untranslated
+
                     add_translation(translation, xml)
 
                     if ref_translation.present?
@@ -73,6 +76,11 @@ module I18nLite
 
       private
 
+      def dataset(name, locale)
+        raise UnknownDatasetError.new(name) unless [:untranslated, :existing].include?(name)
+        I18n.backend.model.send(name, locale)
+      end
+
       def get_date
         DateTime.now.iso8601
       end
@@ -80,15 +88,21 @@ module I18nLite
       def add_translation(translation, xml)
         if translation.is_array
           I18n.backend.model.by_prefix(translation.key, translation.locale).each do |element|
-            xml.translation {
-              xml.cdata element.translation
-            }
+            add_content(element, xml)
           end
         else
-          xml.translation {
-            xml.cdata translation.translation
-          }
+          add_content(translation, xml)
         end
+      end
+
+      def add_content(translation, xml)
+        xml.translation {
+          if translation.translation.present?
+            xml.cdata translation.translation
+          else
+            xml.text ''
+          end
+        }
       end
 
       def get_reference(key)
@@ -104,7 +118,10 @@ module I18nLite
     class UnknownLocaleError < Exception
     end
 
-    class NotInUniverse < Exception
+    class UnknownDatasetError < Exception
+    end
+
+    class NoReferenceLocaleError < Exception
     end
   end
 end

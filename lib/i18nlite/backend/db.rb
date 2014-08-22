@@ -40,7 +40,8 @@ module I18nLite
           end
         end
 
-        @model.insert_filtered(translations)
+        # Weed out existing translations not in universe
+        @model.insert_or_update(translations)
       end
 
       def available_locales
