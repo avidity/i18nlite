@@ -74,7 +74,7 @@ module I18nLite
         expanded
       end
 
-      protected
+    protected
 
       def locales
         I18n.fallback_list || [locale]
@@ -106,10 +106,24 @@ module I18nLite
         end
 
         if record.is_array?
-          @model.by_prefix(norm_key, record.locale).pluck(:translation)
+          as_array(@model.by_prefix(norm_key, record.locale).pluck(:key, :translation))
         else
           record.translation
         end
+      end
+
+    private
+
+      def as_array(elements)
+        elements.sort { |a, b|
+          index_from_key(a[0]) <=> index_from_key(b[0])
+        }.map { |e|
+          e[1]
+        }
+      end
+
+      def index_from_key(key)
+        key[key.rindex(".") + 1..-1].to_i
       end
     end
   end

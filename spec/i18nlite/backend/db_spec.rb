@@ -142,6 +142,18 @@ describe I18nLite::Backend::DB do
     it 'can lookup arrays using a scope' do
       expect(I18n.t(:key, scope: :dummy)).to eq ['First', 'Second', 'Third']
     end
+
+    it 'return elements in order' do
+      TestTranslation.create(locale: 'system', key: 'dummy.key.4', translation: 'Fourth')
+      TestTranslation.create(locale: 'system', key: 'dummy.key.7', translation: 'Seventh')
+      TestTranslation.create(locale: 'system', key: 'dummy.key.5', translation: 'Fifth')
+      TestTranslation.create(locale: 'system', key: 'dummy.key.6', translation: 'Sixth')
+      TestTranslation.create(locale: 'system', key: 'dummy.key.8', translation: 'Eighth')
+      TestTranslation.create(locale: 'system', key: 'dummy.key.10', translation: 'Thenth')
+      TestTranslation.create(locale: 'system', key: 'dummy.key.9', translation: 'Nineth')
+
+      expect(I18n.t(:'dummy.key')).to eq ['First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth', 'Nineth', 'Thenth']
+    end
   end
 
   context "storing" do

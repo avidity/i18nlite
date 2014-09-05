@@ -42,7 +42,7 @@ module I18nLite
         end
 
         def by_prefix(key, locale)
-          where('key LIKE ? AND locale = ?', "#{key}.%", locale).order(:key)
+          where('key LIKE ? AND locale = ?', "#{key}.%", locale)
         end
 
         def by_prefix_and_preference(key, locales)

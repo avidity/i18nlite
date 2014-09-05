@@ -23,14 +23,6 @@ describe TestTranslation do
 
       expect( TestTranslation.by_prefix(:dummy, :dummy1) ).to match_array([t1, t2])
     end
-
-    it 'sorts matching translations on their key' do
-      t1 = TestTranslation.create(locale: 'dummy1', key: 'dummy.key.2')
-      t2 = TestTranslation.create(locale: 'dummy1', key: 'dummy.key.0')
-      t3 = TestTranslation.create(locale: 'dummy1', key: 'dummy.key.1')
-
-      expect( TestTranslation.by_prefix(:dummy, :dummy1) ).to eq([t2, t3, t1])
-    end
   end
 
   context '::find_by_preference' do
