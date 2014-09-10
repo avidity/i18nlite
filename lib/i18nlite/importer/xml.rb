@@ -41,21 +41,35 @@ module I18nLite
 
         elements.each do |element|
           key = element.attribute('key').value
-          translation_values = element.xpath('./translation/text()')
+          translation_elements = element.xpath('./translation')
 
-          translations[key] = if translation_values.size == 1
-            translation_values.first.content
+          translation = if translation_elements.size == 1
+            translation_elements.first.content
           else
-            translation_values.map {|v| v.content }
+            translation_elements.map {|v| v.content }
           end
+
+          num_references = element.xpath('count(./reference/translation)').to_i
+
+          if num_references > 0
+            num_translated = (translation.kind_of?(Array)) ? translation.size : 1
+
+            unless num_references == num_translated
+              raise ReferenceMismatchError.new("#{key} has #{num_translated} translations, expected #{num_references}")
+            end
+          end
+
+          translations[key] = translation
         end
 
         I18n.backend.store_translations(locale, translations)
       end
     end
 
-
     class XMLFormatError < Exception
+    end
+
+    class ReferenceMismatchError < Exception
     end
   end
 end

@@ -66,6 +66,27 @@ describe I18nLite::Importer::XML do
       importer.import!
     end
 
+    it 'handles cdata sections correctly' do
+      importer = I18nLite::Importer::XML.new(xml(:cdata))
+
+      expect(I18n.backend).to receive(:store_translations).with('sv', {
+        'site.welcome' => 'Välkommen <b>hit</b>!'
+      })
+      importer.import!
+    end
+
+    it 'accepts empty elements as non-null empty translations' do
+      importer = I18nLite::Importer::XML.new(xml(:empty_element))
+
+      expect(I18n.backend).to receive(:store_translations).with('sv', {
+        'site.welcome' => ''
+      })
+
+      importer.import!
+    end
+  end
+
+  context 'parse array values' do
     it 'supports arrays of strings' do
       importer = I18nLite::Importer::XML.new(xml(:array))
 
@@ -75,18 +96,43 @@ describe I18nLite::Importer::XML do
       importer.import!
     end
 
-    it 'handles cdata sections correctly' do
-      importer = I18nLite::Importer::XML.new(xml(:cdata))
+    it 'accepts empty array elements as non-null empty translations' do
+      importer = I18nLite::Importer::XML.new(xml(:empty_array_element))
 
       expect(I18n.backend).to receive(:store_translations).with('sv', {
-        'site.welcome' => 'Välkommen <b>hit</b>!'
+        'site.welcome' => ['', 'En', 'Två']
       })
+
       importer.import!
+    end
+
+    it 'requires translations to be array if reference is' do
+      importer = I18nLite::Importer::XML.new(xml(:no_array))
+
+      expect {
+        importer.import!
+      }.to raise_error(I18nLite::Importer::ReferenceMismatchError)
+    end
+
+    it 'requires number of translation elements to match reference elements' do
+      importer = I18nLite::Importer::XML.new(xml(:uneven_array))
+
+      expect {
+        importer.import!
+      }.to raise_error(I18nLite::Importer::ReferenceMismatchError)
+    end
+
+    it 'will not accept array unless reference is one' do
+      importer = I18nLite::Importer::XML.new(xml(:should_not_be_array))
+
+      expect {
+        importer.import!
+      }.to raise_error(I18nLite::Importer::ReferenceMismatchError)
     end
   end
 
-  context 'return values' do
-    it 'returns a hash with imported locales and numbers' do
+  context 'returns' do
+    it 'a hash with imported locales and numbers' do
       importer = I18nLite::Importer::XML.new(xml(:two_locales))
 
       expect(importer).to receive(:import_locale).with('sv', anything()).and_return(10)
@@ -197,6 +243,72 @@ eoXML
         <strings locale="sv">
           <string>
             <translation>Välkommen</translation>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    empty_element: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <strings locale="sv">
+          <string key="site.welcome">
+            <translation/>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    empty_array_element: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <strings locale="sv">
+          <string key="site.welcome">
+            <translation/>
+            <translation>En</translation>
+            <translation>Två</translation>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    no_array: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <strings locale="sv">
+          <string key="site.welcome">
+            <translation>Hej</translation>
+            <reference>
+              <translation>Hi</translation>
+              <translation>Hello</translation>
+            </reference>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    uneven_array: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <strings locale="sv">
+          <string key="site.welcome">
+            <translation>Hej</translation>
+            <translation>Tjena</translation>
+            <reference>
+              <translation>Hi</translation>
+              <translation>Hello</translation>
+              <translation>Yo</translation>
+            </reference>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    should_not_be_array: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <strings locale="sv">
+          <string key="site.welcome">
+            <translation>Hej</translation>
+            <translation>Tjena</translation>
+            <reference>
+              <translation>Hi</translation>
+            </reference>
           </string>
         </strings>
       </i18n>
