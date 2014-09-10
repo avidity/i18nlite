@@ -1,6 +1,14 @@
 # encoding: UTF-8
 require "spec_helper"
 
+describe I18nLite::Importer::XMLFormatError do
+  it { is_expected.to be_kind_of(I18nLite::Importer::Error) }
+end
+
+describe I18nLite::Importer::ReferenceMismatchError do
+  it { is_expected.to be_kind_of(I18nLite::Importer::Error) }
+end
+
 describe I18nLite::Importer::XML do
   def xml(name)
     TestXmlData.get(name)

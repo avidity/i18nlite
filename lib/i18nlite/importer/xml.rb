@@ -66,10 +66,14 @@ module I18nLite
       end
     end
 
-    class XMLFormatError < Exception
+
+    class Error < Exception
     end
 
-    class ReferenceMismatchError < Exception
+    class XMLFormatError < Error
+    end
+
+    class ReferenceMismatchError < Error
     end
   end
 end
