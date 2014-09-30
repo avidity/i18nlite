@@ -1,19 +1,21 @@
 module I18n
-  @@fallback_list = []
+  @@fallback_list = {}
 
   class << self
 
-    def fallback_list
-      @@fallback_list.unshift(I18n.locale)      unless @@fallback_list.first == I18n.locale
-      @@fallback_list.push(I18n.system_locale)  unless @@fallback_list.last  == I18n.system_locale
-      @@fallback_list
+    def fallback_list(locale=I18n.locale)
+      list = @@fallback_list[locale] ||= []
+
+      list.unshift(locale)          unless list.first == locale
+      list.push(I18n.system_locale) unless list.last  == I18n.system_locale
+      list
     end
 
     def fallback_list=(new_fallbacks)
-      if new_fallbacks.kind_of? Array
-        @@fallback_list = new_fallbacks
+      @@fallback_list[I18n.locale] = if new_fallbacks.kind_of? Array
+        new_fallbacks
       else
-        @@fallback_list = []
+        []
       end
     end
 

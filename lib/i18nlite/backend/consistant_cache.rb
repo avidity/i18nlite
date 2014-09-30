@@ -6,8 +6,14 @@ module I18nLite
       include I18n::Backend::Cache
 
       def cache_key(locale, key, options)
+        locale_key = if I18n.respond_to? :fallback_list
+          I18n.fallback_list(locale).join(';')
+        else
+          locale
+        end
+
         hash = (options.empty?) ? '' : MurmurHash3::V32.str_hash(options.values.join(';'))
-        "i18n/#{locale}/#{key}/#{hash}"
+        "i18n/;#{locale_key};/#{key}/#{hash}"
       end
     end
   end

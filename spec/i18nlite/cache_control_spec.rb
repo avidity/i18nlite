@@ -64,6 +64,21 @@ describe I18nLite::CacheControl do
       I18nLite::CacheControl.clear_all
     end
   end
+
+  context "clear locale" do
+    it "calls the adaptor to get a pattern matching all i18n keys for a locale" do
+      I18n.stub(:cache_store) { ActiveSupport::Cache::MemoryStore.new }
+      expect(I18nLite::CacheControl.adaptor).to receive(:locale_pattern).with(:en)
+      I18nLite::CacheControl.clear_locale(:en)
+    end
+
+    it "It defaults to invoking clear of the configured cache store" do
+      cache = MyTest::FakeCacheStore.new
+      expect(cache).to receive(:clear)
+      I18n.stub(:cache_store) { cache }
+      I18nLite::CacheControl.clear_locale(:en)
+    end
+  end
 end
 
 describe I18nLite::KeyedCacheAdaptor::Base do

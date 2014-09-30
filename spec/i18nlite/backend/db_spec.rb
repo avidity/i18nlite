@@ -213,13 +213,8 @@ describe I18nLite::Backend::DB do
 
   context 'lookup with fallbacks' do
     before(:each) do
-      @original_fallbacks = I18n.fallback_list
-      I18n.fallback_list = [:middle_locale]
       I18n.locale = :dummy
-    end
-
-    after(:each) do
-      I18n.fallback_list = @original_fallbacks
+      I18n.fallback_list = [:middle_locale]
     end
 
     it 'ensures current and system locale exists in fallback_list' do

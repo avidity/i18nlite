@@ -29,6 +29,14 @@ module I18nLite
         end
       end
 
+      def clear_locale(locale)
+        begin
+          I18n.cache_store.delete_matched( adaptor.locale_pattern(locale) )
+        rescue NotImplementedError
+          I18n.cache_store.clear
+        end
+      end
+
       def clear_all
         begin
           I18n.cache_store.delete_matched( adaptor.greedy_pattern )
@@ -64,6 +72,9 @@ module I18nLite
         end || self).new
       end
 
+      def locale_pattern(key)
+      end
+
       def scoped_pattern(key)
       end
 
@@ -76,6 +87,10 @@ module I18nLite
         %w(
           ActiveSupport::Cache::RedisStore
         )
+      end
+
+      def locale_pattern(locale)
+        "i18n/*;#{locale};*/*"
       end
 
       def scoped_pattern(key)
@@ -93,6 +108,10 @@ module I18nLite
           ActiveSupport::Cache::MemoryStore
           ActiveSupport::Cache::FileStore
         )
+      end
+
+      def locale_pattern(locale)
+        "^i18n/.*;#{locale};.*/"
       end
 
       def scoped_pattern(key)
