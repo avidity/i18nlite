@@ -15,7 +15,7 @@ module I18nLite
         imported = {}
 
         @doc.xpath("//strings").each do |element|
-          locale = element.attribute('locale').value
+          locale = element.attribute('locale').value.downcase
 
           imported[locale] = import_locale(locale, element.xpath('./string'))
         end

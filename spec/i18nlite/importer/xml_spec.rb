@@ -114,6 +114,16 @@ describe I18nLite::Importer::XML do
       importer.import!
     end
 
+    it 'forces locale to be lower case' do
+      importer = I18nLite::Importer::XML.new(xml(:upper_case_locale))
+
+      expect(I18n.backend).to receive(:store_translations).with('sv-se', {
+        'site.welcome' => 'Välkommen'
+      })
+
+      importer.import!
+    end
+
     it 'requires translations to be array if reference is' do
       importer = I18nLite::Importer::XML.new(xml(:no_array))
 
@@ -239,6 +249,16 @@ eoXML
       <?xml version="1.0" encoding="utf-8"?>
       <i18n>
         <strings>
+          <string key="site.welcome">
+            <translation>Välkommen</translation>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    upper_case_locale: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <strings locale="sv-SE">
           <string key="site.welcome">
             <translation>Välkommen</translation>
           </string>
