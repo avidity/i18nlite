@@ -16,12 +16,12 @@ Gem::Specification.new do |s|
   s.files = Dir["{app,config,db,lib}/**/*", "Rakefile"]
   s.test_files = Dir["test/**/*"]
 
-  s.add_dependency "rails", "4.0.5"
-  s.add_dependency 'nokogiri'
+  s.add_dependency 'rails', '4.0.5'
+  s.add_dependency 'nokogiri', '1.5.11'
   s.add_dependency 'murmurhash3'
 
   s.add_development_dependency 'pg'
-  s.add_development_dependency "rspec-rails", "2.99"
-  s.add_development_dependency "database_cleaner"
+  s.add_development_dependency 'rspec-rails', '2.99'
+  s.add_development_dependency 'database_cleaner'
   s.add_development_dependency 'simplecov', '~> 0.8.0'
 end
