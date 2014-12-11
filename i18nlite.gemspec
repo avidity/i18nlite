@@ -18,10 +18,10 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'rails', '4.0.5'
   s.add_dependency 'nokogiri', '1.5.11'
-  s.add_dependency 'murmurhash3'
+  s.add_dependency 'murmurhash3', '0.1.3'
 
-  s.add_development_dependency 'pg'
-  s.add_development_dependency 'rspec-rails', '2.99'
-  s.add_development_dependency 'database_cleaner'
-  s.add_development_dependency 'simplecov', '~> 0.8.0'
+  s.add_development_dependency 'pg', '0.17.1'
+  s.add_development_dependency 'rspec-rails', '2.99.0'
+  s.add_development_dependency 'database_cleaner', '1.1.1'
+  s.add_development_dependency 'simplecov', '0.8.2'
 end
