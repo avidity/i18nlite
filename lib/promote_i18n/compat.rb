@@ -71,15 +71,6 @@ module PromoteI18n
     end
   end
 
-  class RegisterInExceptionalTranslationMissingHandler
-    include I18nLite::Compat
-
-    class << self
-      def compat_delegate_to
-        I18nLite::Error::RegisterMissingHandler
-      end
-    end
-  end
 end
 
 ActionController::Base.send :include, PromoteI18n::FallbackChain
