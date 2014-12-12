@@ -90,13 +90,6 @@ describe PromoteI18n do
   end
 end
 
-describe PromoteI18n::RegisterInExceptionalTranslationMissingHandler do
-  it { is_expected.to be_a I18nLite::Compat }
-  it 'should delegate to I18nLite' do
-    expect(PromoteI18n::RegisterInExceptionalTranslationMissingHandler.compat_delegate_to).to be I18nLite::Error::RegisterMissingHandler
-  end
-end
-
 describe PromoteI18n::RaiseTranslationMissingHandler do
   it { is_expected.to be_a I18nLite::Compat }
   it 'should delegate to I18nLite' do
