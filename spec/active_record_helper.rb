@@ -3,7 +3,7 @@ require 'active_record'
 ActiveRecord::Base.establish_connection(
   :adapter  => "postgresql",
   :database => ENV.fetch('I18NLITE_DB_NAME', 'i18nlite_test'),
-  :username => ENV.fetch('I18NLITE_DB_USER', 'i18nlite_test'),
+  :email => ENV.fetch('I18NLITE_DB_USER', 'i18nlite_test'),
   :password => ENV.fetch('I18NLITE_DB_PASS', 'i18nlite_test')
 )
 
