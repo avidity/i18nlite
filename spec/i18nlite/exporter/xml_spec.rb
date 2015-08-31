@@ -148,12 +148,12 @@ describe I18nLite::Exporter::XML do
         'my.key.a' => 'my key a system',
         'my.key.b' => 'my key b system',
         'my.key.c' => 'my key c system',
-        'my.array' => ['first system', 'second system', 'third system'],
+        'my.array' => ['first system', 'second system', 'third system', 'fourth system', 'fifth system', 'sixth system', 'seventh system', 'eighth system', 'nineth system', 'tenth system', 'eleventh system', 'twelwth system'],
       })
       I18n.backend.store_translations(:en, {
         'my.key.a' => 'my key a en',
         'my.key.b' => 'my key b en',
-        'my.array' => ['first en', 'second en', 'third en'],
+        'my.array' => ['first en', 'second en', 'third en', 'fourth en', 'fifth en', 'sixth en', 'seventh en', 'eighth en', 'nineth en', 'tenth en', 'eleventh en', 'twelwth en'],
       })
       I18n.backend.store_translations(:sv, {
         'my.key.a' => 'my key a sv',
@@ -205,17 +205,35 @@ describe I18nLite::Exporter::XML do
       expect(xml).not_to have_reference('en', 'my.key.c', 'my key c system')
     end
 
-    it 'generates multiple translation in order for arrays' do
+    it 'generates multiple translation, explicitly sorted for arrays' do
       exporter.locales = :en
       xml = exporter.export
 
       expect(xml).to have_translation_at('en', 'my.array', 1, 'first en')
       expect(xml).to have_translation_at('en', 'my.array', 2, 'second en')
       expect(xml).to have_translation_at('en', 'my.array', 3, 'third en')
+      expect(xml).to have_translation_at('en', 'my.array', 4, 'fourth en')
+      expect(xml).to have_translation_at('en', 'my.array', 5, 'fifth en')
+      expect(xml).to have_translation_at('en', 'my.array', 6, 'sixth en')
+      expect(xml).to have_translation_at('en', 'my.array', 7, 'seventh en')
+      expect(xml).to have_translation_at('en', 'my.array', 8, 'eighth en')
+      expect(xml).to have_translation_at('en', 'my.array', 9, 'nineth en')
+      expect(xml).to have_translation_at('en', 'my.array', 10, 'tenth en')
+      expect(xml).to have_translation_at('en', 'my.array', 11, 'eleventh en')
+      expect(xml).to have_translation_at('en', 'my.array', 12, 'twelwth en')
 
       expect(xml).to have_reference_at('en', 'my.array', 1, 'first system')
       expect(xml).to have_reference_at('en', 'my.array', 2, 'second system')
       expect(xml).to have_reference_at('en', 'my.array', 3, 'third system')
+      expect(xml).to have_reference_at('en', 'my.array', 4, 'fourth system')
+      expect(xml).to have_reference_at('en', 'my.array', 5, 'fifth system')
+      expect(xml).to have_reference_at('en', 'my.array', 6, 'sixth system')
+      expect(xml).to have_reference_at('en', 'my.array', 7, 'seventh system')
+      expect(xml).to have_reference_at('en', 'my.array', 8, 'eighth system')
+      expect(xml).to have_reference_at('en', 'my.array', 9, 'nineth system')
+      expect(xml).to have_reference_at('en', 'my.array', 10, 'tenth system')
+      expect(xml).to have_reference_at('en', 'my.array', 11, 'eleventh system')
+      expect(xml).to have_reference_at('en', 'my.array', 12, 'twelwth system')
     end
 
     it 'skips translations that does not exist in reference locale' do
