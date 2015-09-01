@@ -87,9 +87,13 @@ module I18nLite
 
       def add_translation(translation, xml)
         if translation.is_array
-          I18n.backend.model.by_prefix(translation.key, translation.locale).each do |element|
+          I18n.backend.model.by_prefix(translation.key, translation.locale).sort {
+            |element_a, element_b|
+            index_from_key(element_a.key) <=> index_from_key(element_b.key)
+          }.each {
+            |element|
             add_content(element, xml)
-          end
+          }
         else
           add_content(translation, xml)
         end
@@ -112,6 +116,10 @@ module I18nLite
           }
         end
         @references[key]
+      end
+
+      def index_from_key(key)
+        key[key.rindex(".") + 1..-1].to_i
       end
     end
 
