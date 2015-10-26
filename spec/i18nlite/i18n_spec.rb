@@ -39,10 +39,9 @@ describe I18n do
     end
 
     it 'will store fallbacks independent on current locale' do
-      I18n.stub(:locale).and_return(:sv)
+      allow(I18n).to receive(:locale).and_return(:sv)
       I18n.fallback_list = [:fallback_sv]
-
-      I18n.stub(:locale).and_return(:en)
+      allow(I18n).to receive(:locale).and_return(:en)
 
       expect(I18n.fallback_list).to eq [:en, I18n.system_locale]
     end

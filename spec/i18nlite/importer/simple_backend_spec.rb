@@ -11,7 +11,9 @@ describe I18nLite::Importer::SimpleBackend do
   end
 
   before(:each) do
-    I18n.stub(:load_path).and_return([File.join(File.dirname(__FILE__), '..', '..', 'support', 'data', 'sample.yml')])
+    allow(I18n).to receive(:load_path).and_return(
+      [ File.join(File.dirname(__FILE__), '..', '..', 'support', 'data', 'sample.yml') ]
+    )
   end
 
   context 'initialization' do
