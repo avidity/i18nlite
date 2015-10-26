@@ -18,4 +18,5 @@ require 'action_controller'
 require 'rails'
 
 module I18nLite
+
 end

@@ -4,8 +4,8 @@ describe I18nLite::Backend::SimpleImporter do
   it { is_expected.to be_kind_of I18n::Backend::Simple }
 
   before(:each) do
-    I18n.stub(:load_path).and_return([File.join(File.dirname(__FILE__), '..', '..', 'support', 'data', 'sample.yml')])
-    I18n.stub(:locale).and_return(:test_locale)
+    allow(I18n).to receive(:load_path).and_return([File.join(File.dirname(__FILE__), '..', '..', 'support', 'data', 'sample.yml')])
+    allow(I18n).to receive(:locale).and_return(:test_locale)
   end
 
   context '#all_flattened' do

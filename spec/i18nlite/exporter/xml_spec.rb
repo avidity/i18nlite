@@ -14,8 +14,8 @@ describe I18nLite::Exporter::XML do
   end
 
   before(:each) do
-    I18n.stub(:available_locales).and_return([:pt, :sv, :en])
-    I18n.stub(:system_locale).and_return(:system)
+    allow(I18n).to receive(:available_locales).and_return([:pt, :sv, :en])
+    allow(I18n).to receive(:system_locale).and_return(:system)
   end
 
   let(:exporter) { I18nLite::Exporter::XML.new() }
@@ -108,7 +108,7 @@ describe I18nLite::Exporter::XML do
   context '/i18n' do
     it 'exports current date' do
       date = "2014-06-25T09:12:12Z-0300"
-      I18nLite::Exporter::XML.any_instance.stub(:get_date).and_return(date)
+      allow_any_instance_of(I18nLite::Exporter::XML).to receive(:get_date).and_return(date)
 
       xml = exporter.export
       expect(xml).to have_xml("/i18n[@generated='#{date}']")
@@ -285,11 +285,11 @@ end
       expect(xml).to have_xml(sprintf(xpath, *args), text)
     end
 
-    failure_message_for_should do |xml|
+    failure_message do |xml|
       "expected to find #{desc} #{path} in:\n#{xml}"
     end
 
-    failure_message_for_should_not do |xml|
+    failure_message_when_negated do |xml|
       "expected not to find #{desc} #{path} in:\n#{xml}"
     end
 

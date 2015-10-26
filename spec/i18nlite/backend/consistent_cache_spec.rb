@@ -10,7 +10,7 @@ describe I18nLite::Backend::ConsistentCache do
   let(:backend) { MyBackend.new }
 
   before(:each) do
-    I18n.stub(:system_locale).and_return(:system)
+    allow(I18n).to receive(:system_locale).and_return(:system)
   end
 
   it "implements I18n::Backend::Cache" do
@@ -28,7 +28,7 @@ describe I18nLite::Backend::ConsistentCache do
   end
 
   it 'returns configured fallback chain' do
-    I18n.stub(:locale).and_return(:'sv-fi')
+    allow(I18n).to receive(:locale).and_return(:'sv-fi')
     I18n.fallback_list = [:'sv-se', :sv]
 
     expect(backend.cache_key(
@@ -37,7 +37,7 @@ describe I18nLite::Backend::ConsistentCache do
   end
 
   it 'uses locale unless fallback_list method is implemented' do
-    I18n.stub(:respond_to?).with(:fallback_list).and_return(false)
+    allow(I18n).to receive(:respond_to?).with(:fallback_list).and_return(false)
 
     expect(backend.cache_key(
       :sv, :'my.translation.key', {}
