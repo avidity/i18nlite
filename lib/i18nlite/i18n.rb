@@ -3,6 +3,8 @@ module I18n
 
   class << self
 
+    # NEW: Move to something based on I18n::Locale::Fallbacks instead
+    # and that is using the same interface
     def fallback_list(locale=I18n.locale)
       list = @@fallback_list[locale] ||= []
 
@@ -18,6 +20,9 @@ module I18n
         []
       end
     end
+
+
+    # NEW: Should we use default locale instead?
 
     def system_locale
       :system

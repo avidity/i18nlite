@@ -16,10 +16,6 @@ require "i18nlite/exporter/xml"
 require 'active_support/concern'
 require 'action_controller'
 require 'rails'
-require "promote_i18n/compat"
 
 module I18nLite
-end
-
-module PromoteI18n
 end

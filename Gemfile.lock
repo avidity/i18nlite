@@ -37,6 +37,7 @@ GEM
       tzinfo (~> 1.1)
     arel (5.0.1.20140414130214)
     builder (3.2.2)
+    byebug (6.0.2)
     database_cleaner (1.1.1)
     diff-lcs (1.2.5)
     docile (1.1.5)
@@ -107,6 +108,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  byebug
   database_cleaner (= 1.1.1)
   i18nlite!
   pg (= 0.17.1)

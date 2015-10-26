@@ -1,7 +1,7 @@
 module I18nLite
   module Error
     # Raises translation errors just as
-    # I18n.exception_handler = PromoteI18n::RaiseTranslationMissingHandler.new
+    # I18n.exception_handler = I18nLite::RaiseMissingHandler.new
 
     class RaiseMissingHandler
       def self.call(*args)
@@ -10,23 +10,6 @@ module I18nLite
 
       def call(exception, locale, key, options)
         raise I18n::MissingTranslationData.new(locale, key, options)
-      end
-    end
-
-    class RegisterMissingHandler
-      def self.call(*args)
-        new.call(*args)
-      end
-
-      def call(exception, locale, key, options)
-        exception = I18n::MissingTranslationData.new(locale, key, options)
-        if defined? Promote::ExceptionReporter
-          Promote::ExceptionReporter.rescue_and_report("Translation missing #{key}, #{locale}") do
-            raise exception
-          end
-        else
-          raise exception
-        end
       end
     end
   end
