@@ -4,17 +4,17 @@ module I18nLite
     #
     # Provides the interface to keyed cache control:
     # You'll be mostly concerned with:
-    #  > PromoteI18n::CacheControl.clear_keys(:'my.string', :'my_other_string')
+    #  > I18nLite::CacheControl.clear_keys(:'my.string', :'my_other_string')
     #
     # You may need to clear all cached keys
-    #  > PromoteI18n::CacheControl.clear_all
+    #  > I18nLite::CacheControl.clear_all
     #
     # But may find this handy:
-    #  > PromoteI18n::CacheControl.can_clear_keys?
+    #  > I18nLite::CacheControl.can_clear_keys?
     # =>  true # or false
     #
     # You can access the adaptor directly
-    #  > PromoteI18n::CacheControl.adaptor
+    #  > I18nLite::CacheControl.adaptor
     # => an instance that that can deal with the configured cache store
     #
 

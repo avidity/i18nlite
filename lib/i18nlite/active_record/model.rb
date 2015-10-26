@@ -52,6 +52,7 @@ module I18nLite
         end
 
         def all_locales
+          # NEW: This is removed in favour of LocaleModel.all.pluck(:locale)
           self.select(:locale).distinct.pluck(:locale).compact
         end
 

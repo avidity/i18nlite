@@ -45,6 +45,7 @@ module I18nLite
       end
 
       def available_locales
+        # NEW: Use locale model to access all locales instead
         locales = @model.all_locales.map {|l| l.to_sym }
         locales.unshift(:en) unless locales.include?(:en)
         locales
@@ -90,7 +91,7 @@ module I18nLite
             # If we didn't find a direct match, and :count was passed in, we'll
             # try to find matching '.one', '.zero' and pass them on to the magic
             # pluralization engine
-            # If no match was found, we return nil, causing a missing translation error
+            # If no match was found, we return nil, causing a missing translation exception
 
             result = Hash[
               @model.by_prefix_and_preference(norm_key, locales).map {

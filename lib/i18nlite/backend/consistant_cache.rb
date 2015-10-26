@@ -13,6 +13,7 @@ module I18nLite
         end
 
         hash = (options.empty?) ? '' : MurmurHash3::V32.str_hash(options.values.join(';'))
+        # NOTE: The tailing "/" if options are empty is intentional!
         "i18n/;#{locale_key};/#{key}/#{hash}"
       end
     end
