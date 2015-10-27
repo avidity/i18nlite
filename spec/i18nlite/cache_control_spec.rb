@@ -14,19 +14,19 @@ describe I18nLite::CacheControl do
     end
 
     it "can clear keys if cache store is a memory store" do
-      I18n.stub(:cache_store) { ActiveSupport::Cache::MemoryStore.new }
+      allow(I18n).to receive(:cache_store) { ActiveSupport::Cache::MemoryStore.new }
       expect(I18nLite::CacheControl.can_clear_keys?).to be true
     end
 
     it "cannot clear keys if cache store is the base store" do
-      I18n.stub(:cache_store) { MyTest::FakeCacheStore.new }
+      allow(I18n).to receive(:cache_store) { MyTest::FakeCacheStore.new }
       expect(I18nLite::CacheControl.can_clear_keys?).to be false
     end
   end
 
   context "adaptor" do
     it "finds adaptor based on I18n cache setting" do
-      I18n.stub(:cache_store) { ActiveSupport::Cache::MemoryStore.new }
+      allow(I18n).to receive(:cache_store) { ActiveSupport::Cache::MemoryStore.new }
       expect(I18nLite::CacheControl.adaptor).to be_kind_of( I18nLite::KeyedCacheAdaptor::RegExp )
     end
   end
@@ -36,7 +36,7 @@ describe I18nLite::CacheControl do
     let(:key2) { "Key 2" }
 
     it "calls the adaptor to get a pattern matching each key" do
-      I18n.stub(:cache_store) { ActiveSupport::Cache::MemoryStore.new }
+      allow(I18n).to receive(:cache_store) { ActiveSupport::Cache::MemoryStore.new }
       expect(I18nLite::CacheControl.adaptor).to receive(:scoped_pattern).with(key1)
       expect(I18nLite::CacheControl.adaptor).to receive(:scoped_pattern).with(key2)
       I18nLite::CacheControl.clear_keys(key1, key2)
@@ -45,14 +45,14 @@ describe I18nLite::CacheControl do
     it "It defaults to invoking clear of the configured cache store" do
       cache = MyTest::FakeCacheStore.new
       expect(cache).to receive(:clear)
-      I18n.stub(:cache_store) { cache }
+      allow(I18n).to receive(:cache_store) { cache }
       I18nLite::CacheControl.clear_keys(key1, key2)
     end
   end
 
   context "clear all" do
     it "calls the adaptor to get a pattern matching all i18n keys" do
-      I18n.stub(:cache_store) { ActiveSupport::Cache::MemoryStore.new }
+      allow(I18n).to receive(:cache_store) { ActiveSupport::Cache::MemoryStore.new }
       expect(I18nLite::CacheControl.adaptor).to receive(:greedy_pattern)
       I18nLite::CacheControl.clear_all
     end
@@ -60,14 +60,14 @@ describe I18nLite::CacheControl do
     it "It defaults to invoking clear of the configured cache store" do
       cache = MyTest::FakeCacheStore.new
       expect(cache).to receive(:clear)
-      I18n.stub(:cache_store) { cache }
+      allow(I18n).to receive(:cache_store) { cache }
       I18nLite::CacheControl.clear_all
     end
   end
 
   context "clear locale" do
     it "calls the adaptor to get a pattern matching all i18n keys for a locale" do
-      I18n.stub(:cache_store) { ActiveSupport::Cache::MemoryStore.new }
+      allow(I18n).to receive(:cache_store) { ActiveSupport::Cache::MemoryStore.new }
       expect(I18nLite::CacheControl.adaptor).to receive(:locale_pattern).with(:en)
       I18nLite::CacheControl.clear_locale(:en)
     end
@@ -75,7 +75,7 @@ describe I18nLite::CacheControl do
     it "It defaults to invoking clear of the configured cache store" do
       cache = MyTest::FakeCacheStore.new
       expect(cache).to receive(:clear)
-      I18n.stub(:cache_store) { cache }
+      allow(I18n).to receive(:cache_store) { cache }
       I18nLite::CacheControl.clear_locale(:en)
     end
   end

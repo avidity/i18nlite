@@ -132,15 +132,15 @@ describe TestTranslation do
 
     it 'returns all matching records in the given universe' do
 
-      # FIXME: Unsorted array comparison using expect...to syntax with rspec 2.14?
-      TestTranslation.all_by_preference([:preferred, :fallback]).should =~ [@t1, @t2]
+      preferred = TestTranslation.all_by_preference([:preferred, :fallback])
+      expect( preferred ).to contain_exactly(@t1, @t2)
     end
 
     it 'ignores keys outside of universe' do
       t4 = TestTranslation.create(locale: 'preferred', key: 'outside.universe')
 
-      # FIXME: Unsorted array comparison using expect...to syntax with rspec 2.14?
-      TestTranslation.all_by_preference([:preferred, :fallback]).should =~ [@t1, @t2]
+      preferred = TestTranslation.all_by_preference([:preferred, :fallback])
+      expect( preferred ).to contain_exactly(@t1, @t2)
     end
 
     it 'performs single query if only one locale is given' do
@@ -190,7 +190,7 @@ describe TestTranslation do
       t2 = TestTranslation.create(locale: 'my_locale', key: 'my.other.key')
       t3 = TestTranslation.create(locale: 'other_locale', key: 'other.key')
 
-      TestTranslation.existing('my_locale').to_a.should =~ [t1, t2]
+      expect( TestTranslation.existing('my_locale') ).to contain_exactly(t1, t2)
     end
   end
 
