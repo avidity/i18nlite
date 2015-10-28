@@ -1,6 +1,6 @@
 module I18nLite
   module ActiveRecord
-    module Model
+    module TranslationModel
       def self.included(model)
 
         model.scope :existing, ->(locale) {
