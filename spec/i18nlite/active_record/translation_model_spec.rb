@@ -3,7 +3,7 @@ require "spec_helper"
 # TestTranslation is defined in spec/active_record_helper.rb
 
 describe TestTranslation do
-  it { is_expected.to be_kind_of I18nLite::ActiveRecord::Model }
+  it { is_expected.to be_kind_of I18nLite::ActiveRecord::TranslationModel }
 
   context '::all_locales' do
     it "retrieves an array of all locales" do
@@ -250,7 +250,7 @@ describe TestTranslation do
           { locale: :system1, key: 'my.key', translation: 'my updated translation' },
           { locale: :system2, key: 'my.key', translation: 'my updated translation' }
         ])
-      }.to raise_error(I18nLite::ActiveRecord::Model::MultipleLocalesError)
+      }.to raise_error(I18nLite::ActiveRecord::TranslationModel::MultipleLocalesError)
     end
   end
 end
