@@ -1,5 +1,7 @@
 require 'nokogiri'
 require 'date'
+require 'i18nlite/version'
+
 
 module I18nLite
   module Exporter
