@@ -19,5 +19,5 @@ ActiveRecord::Schema.define do
 end
 
 class TestTranslation < ActiveRecord::Base
-  include I18nLite::ActiveRecord::Model
+  include I18nLite::ActiveRecord::TranslationModel
 end

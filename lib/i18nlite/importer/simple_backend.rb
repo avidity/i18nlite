@@ -1,3 +1,5 @@
+require 'i18nlite/backend/db'
+require 'i18nlite/backend/simple_importer'
 
 module I18nLite
   module Importer

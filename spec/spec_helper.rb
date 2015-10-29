@@ -5,7 +5,6 @@
 $: << File.join(File.dirname(__FILE__), '../lib')
 
 require 'i18nlite'
-require 'rspec/autorun'
 require 'active_record_helper'
 require 'database_cleaner'
 
@@ -24,8 +23,8 @@ RSpec.configure do |config|
 
   config.before(:each) do
     DatabaseCleaner.start
-    I18n.stub(:enforce_available_locales).and_return(false)
-    I18n.stub(:enforce_available_locales!)
+    allow(I18n).to receive(:enforce_available_locales).and_return(false)
+    allow(I18n).to receive(:enforce_available_locales!)
   end
 
   config.after(:each) do
@@ -50,11 +49,11 @@ RSpec::Matchers.define :have_xml do |xpath, text|
     true
   end
 
-  failure_message_for_should do |body|
+  failure_message do |body|
     "expected to find xml tag #{xpath} in:\n#{body}"
   end
 
-  failure_message_for_should_not do |body|
+  failure_message_when_negated do |body|
     "expected not to find xml tag #{xpath} in:\n#{body}"
   end
 

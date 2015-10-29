@@ -1,4 +1,4 @@
-# FIXME: Rename project
+require 'i18nlite/backend/consistant_cache'
 
 module I18nLite
   module Backend
