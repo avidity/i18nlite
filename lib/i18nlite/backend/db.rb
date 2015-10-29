@@ -11,6 +11,7 @@ module I18nLite
 
       def initialize(model)
         @model = model
+        @locale_model = model.locale_model
         super()
       end
 
@@ -45,10 +46,7 @@ module I18nLite
       end
 
       def available_locales
-        # NEW: Use locale model to access all locales instead
-        locales = @model.all_locales.map {|l| l.to_sym }
-        locales.unshift(:en) unless locales.include?(:en)
-        locales
+        @locale_model.all_locales.map {|l| l.to_sym }
       end
 
       def all_flattened
@@ -73,6 +71,14 @@ module I18nLite
         }
 
         expanded
+      end
+
+      def meta(locale)
+        begin
+          @locale_model.find_by!(locale: locale).meta
+        rescue ::ActiveRecord::RecordNotFound
+          {}
+        end
       end
 
     protected

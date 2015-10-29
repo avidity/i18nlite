@@ -5,16 +5,6 @@ require "spec_helper"
 describe TestTranslation do
   it { is_expected.to be_kind_of I18nLite::ActiveRecord::TranslationModel }
 
-  context '::all_locales' do
-    it "retrieves an array of all locales" do
-      TestTranslation.create(locale: 'dummy1', key: 'dummy.key')
-      TestTranslation.create(locale: 'dummy2', key: 'dummy.key')
-      TestTranslation.create(locale: 'dummy2', key: 'dummy.key2')
-
-      expect( TestTranslation.all_locales ).to match_array(['dummy1', 'dummy2'])
-    end
-  end
-
   context '::by_prefix' do
     it 'retrieves an array of translations matches the prefix' do
       t1 = TestTranslation.create(locale: 'dummy1', key: 'dummy.key1')
@@ -251,6 +241,16 @@ describe TestTranslation do
           { locale: :system2, key: 'my.key', translation: 'my updated translation' }
         ])
       }.to raise_error(I18nLite::ActiveRecord::TranslationModel::MultipleLocalesError)
+    end
+
+    it 'will create associate locale object if it does not exist' do
+      expect {
+        TestTranslation.insert_or_update([
+          { locale: :system1, key: 'my.key', translation: 'my updated translation' }
+        ])
+      }.to change {
+        TestTranslation.locale_model.count
+      }.by(1)
     end
   end
 end

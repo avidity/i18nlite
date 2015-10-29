@@ -14,6 +14,38 @@ describe I18n do
     expect(I18n.system_locale).to be :system
   end
 
+  describe 'meta' do
+    context 'with other backend' do
+      it 'returns empty hash' do
+        expect(I18n.meta).to eq({})
+      end
+    end
+
+    context 'with I18Lite::Backend::DB' do
+      before(:each) do
+        @backend = I18n.backend
+        @locale  = I18n.locale
+
+        I18n.backend = I18nLite::Backend::DB.new(TestTranslation)
+        I18n.locale = :dummy
+      end
+
+      after(:each) do
+        I18n.backend = @backend
+        I18n.locale  = @locale
+      end
+
+      it 'returns meta property of associated LocaleModel object' do
+        locale_object = TestLocale.create(locale: I18n.locale, font: 'Arial', rtl: true)
+        expect(I18n.meta).to eq locale_object.meta
+      end
+
+      it 'returns empty hash if matching locale is not found' do
+        expect(I18n.meta).to eq({})
+      end
+    end
+  end
+
   context "fallback_list" do
     it 'will automatically include locale in fallback chain' do
       expect(I18n.fallback_list.first).to eq(I18n.locale)

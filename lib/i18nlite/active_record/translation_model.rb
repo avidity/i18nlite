@@ -1,25 +1,29 @@
 module I18nLite
   module ActiveRecord
     module TranslationModel
+
       def self.included(model)
-
-        model.scope :existing, ->(locale) {
-          model.where(locale: locale)
-        }
-
-        model.scope :untranslated, ->(locale) {
-          model.where('locale = ? AND key NOT IN(?)', I18n.system_locale, model.existing(locale).pluck(:key))
-        }
-
         model.extend ClassMethods
       end
 
       module ClassMethods
 
+        def locale_model(model=nil)
+          unless model.nil?
+            raise StandardError.new "locale_model already set" if @locale_model
+            @locale_model = model
+            @locale_model.translation_model self
+            setup_arel
+          end
+          @locale_model
+        end
+
         def insert_or_update(translations)
           to_update, to_insert = partition_on_keys(translations)
 
           ::ActiveRecord::Base.transaction do
+            self.locale_model.insert_missing(translations.first[:locale]) if translations.size
+
             # NOTE: I was under the impression that this statement would be smart an generate
             # INSERT INTO ... (col1, col2, ...) VALUES
             #  (row1, row1, ...)
@@ -49,11 +53,6 @@ module I18nLite
           return by_prefix(key, locales.first) if locales.size == 1
 
           find_by_sql(coalece_query(locales, key_like: key))
-        end
-
-        def all_locales
-          # NEW: This is removed in favour of LocaleModel.all.pluck(:locale)
-          self.select(:locale).distinct.pluck(:locale).compact
         end
 
         def by_preference(key, locales)
@@ -91,6 +90,21 @@ module I18nLite
         end
 
         private
+
+        def setup_arel
+          self.scope :existing, ->(locale) {
+            self.where(locale: locale)
+          }
+
+          self.scope :untranslated, ->(locale) {
+            self.where('locale = ? AND key NOT IN(?)', I18n.system_locale, self.existing(locale).pluck(:key))
+          }
+
+          self.belongs_to :locale_data,
+                          class_name: locale_model.name,
+                          foreign_key: :locale,
+                          primary_key: :locale
+        end
 
         def partition_on_keys(translations)
           locale = translations.first[:locale]

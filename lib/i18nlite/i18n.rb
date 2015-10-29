@@ -21,9 +21,15 @@ module I18n
       end
     end
 
+    def meta
+      if I18n.backend.kind_of? I18nLite::Backend::DB
+        I18n.backend.meta(I18n.locale)
+      else
+        {}
+      end
+    end
 
     # NEW: Should we use default locale instead?
-
     def system_locale
       :system
     end
