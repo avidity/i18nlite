@@ -13,8 +13,12 @@ module I18nLite
         end
 
         hash = (options.empty?) ? '' : MurmurHash3::V32.str_hash(options.values.join(';'))
-        # NOTE: The tailing "/" if options are empty is intentional!
+        # NOTE: The tailing "/" when options are empty is intentional!
         "i18n/;#{locale_key};/#{key}/#{hash}"
+      end
+
+      def meta_cache_key(locale)
+        "i18n/meta/#{locale}"
       end
     end
   end

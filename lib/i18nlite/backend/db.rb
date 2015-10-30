@@ -8,7 +8,7 @@ module I18nLite
       include I18n::Backend::Flatten
       include I18nLite::Backend::ConsistentCache
 
-      attr_accessor :model
+      attr_accessor :model, :locale_model
 
       def initialize(options)
         @model = options.fetch(:translation_model)
@@ -75,13 +75,13 @@ module I18nLite
       end
 
       def meta(locale)
-        begin
-          locale_instance = @locale_model.find_by!(locale: locale)
-        rescue ::ActiveRecord::RecordNotFound
-          return {}
+        if I18n.cache_store
+          I18n.cache_store.fetch( meta_cache_key(locale) ) do
+            get_meta(locale)
+          end
+        else
+          get_meta(locale)
         end
-
-        I18nLite::Backend::LocaleMeta.new(locale_instance).to_hash
       end
 
     protected
@@ -123,6 +123,16 @@ module I18nLite
       end
 
     private
+
+      def get_meta(locale)
+        begin
+          locale_instance = @locale_model.find_by!(locale: locale)
+        rescue ::ActiveRecord::RecordNotFound
+          return {}
+        end
+
+        I18nLite::Backend::LocaleMeta.new(locale_instance).to_hash
+      end
 
       def as_array(elements)
         elements.sort { |a, b|

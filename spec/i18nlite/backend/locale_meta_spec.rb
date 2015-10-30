@@ -15,7 +15,7 @@ describe I18nLite::Backend::LocaleMeta do
       expect( subject.rtl? ).to be locale_model.rtl?
     end
 
-    it 'ltr? shortcut is inverse of ltr' do
+    it 'ltr? shortcut is inverse of rtl' do
       expect( subject.ltr? ).to be !subject.rtl?
     end
 
