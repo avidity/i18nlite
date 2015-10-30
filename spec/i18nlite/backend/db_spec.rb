@@ -7,7 +7,10 @@ describe I18nLite::Backend::DB do
     @original_locale  = I18n.locale
 
     I18n.enforce_available_locales = false
-    I18n.backend = I18nLite::Backend::DB.new(TestTranslation)
+    I18n.backend = I18nLite::Backend::DB.new(
+      translation_model: TestTranslation,
+      locale_model: TestLocale
+    )
     I18n.locale = :system
   end
 
@@ -33,16 +36,12 @@ describe I18nLite::Backend::DB do
   end
 
   context "available locales" do
-    it "automatically adds :en to list of available locales" do
-      TestTranslation.create(locale: 'dummy', key: 'dummy')
+    it "delegates all to configured test locale" do
+      TestLocale.create(locale: 'dummy2')
+      TestLocale.create(locale: 'dummy1')
 
-      expect(TestTranslation).to receive(:all_locales).and_call_original
-      expect(I18n.available_locales).to eq [:en, :dummy]
-    end
-    it "includes en only if its not already in the list" do
-      TestTranslation.create(locale: 'en')
-
-      expect(I18n.available_locales).to eq [:en]
+      expect(TestLocale).to receive(:all_locales).and_call_original
+      expect(I18n.available_locales).to eq [:dummy1, :dummy2]
     end
   end
 
@@ -280,11 +279,31 @@ describe I18nLite::Backend::DB do
       expect(I18n.backend.all_expanded).to eq({
         'root' => {
           'one' => {
+
             'sub1' => 'OVERRIDE',
             'sub2' => 'Sub 2'
           }
         }
       })
     end
+  end
+
+  context 'meta' do
+    it 'returns meta data of associated locale object' do
+      locale_object = TestLocale.create(locale: :system, font: 'Verdana')
+
+      expect(I18n.backend.meta(:system)).to include(
+        'locale' => 'system',
+        'font'   => 'Verdana',
+        'ltr'    => true,
+        'rtl'    => false,
+        'direction' => 'LTR',
+      )
+    end
+
+    it 'returns nothing if no meta object is found' do
+      expect(I18n.backend.meta(:whatever)).to eq({})
+    end
+
   end
 end

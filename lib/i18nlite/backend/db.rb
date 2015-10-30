@@ -1,4 +1,5 @@
 require 'i18nlite/backend/consistant_cache'
+require 'i18nlite/backend/locale_meta'
 
 module I18nLite
   module Backend
@@ -9,8 +10,9 @@ module I18nLite
 
       attr_accessor :model
 
-      def initialize(model)
-        @model = model
+      def initialize(options)
+        @model = options.fetch(:translation_model)
+        @locale_model = options.fetch(:locale_model)
         super()
       end
 
@@ -45,10 +47,7 @@ module I18nLite
       end
 
       def available_locales
-        # NEW: Use locale model to access all locales instead
-        locales = @model.all_locales.map {|l| l.to_sym }
-        locales.unshift(:en) unless locales.include?(:en)
-        locales
+        @locale_model.all_locales.map {|l| l.to_sym }
       end
 
       def all_flattened
@@ -73,6 +72,16 @@ module I18nLite
         }
 
         expanded
+      end
+
+      def meta(locale)
+        begin
+          locale_instance = @locale_model.find_by!(locale: locale)
+        rescue ::ActiveRecord::RecordNotFound
+          return {}
+        end
+
+        I18nLite::Backend::LocaleMeta.new(locale_instance).to_hash
       end
 
     protected

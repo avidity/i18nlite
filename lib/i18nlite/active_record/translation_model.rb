@@ -1,8 +1,8 @@
 module I18nLite
   module ActiveRecord
     module TranslationModel
-      def self.included(model)
 
+      def self.included(model)
         model.scope :existing, ->(locale) {
           model.where(locale: locale)
         }
@@ -15,11 +15,13 @@ module I18nLite
       end
 
       module ClassMethods
-
         def insert_or_update(translations)
           to_update, to_insert = partition_on_keys(translations)
 
           ::ActiveRecord::Base.transaction do
+            # FIXME: Resolve this somehow:
+            #self.locale_model.insert_missing(translations.first[:locale]) if translations.size
+
             # NOTE: I was under the impression that this statement would be smart an generate
             # INSERT INTO ... (col1, col2, ...) VALUES
             #  (row1, row1, ...)
@@ -49,11 +51,6 @@ module I18nLite
           return by_prefix(key, locales.first) if locales.size == 1
 
           find_by_sql(coalece_query(locales, key_like: key))
-        end
-
-        def all_locales
-          # NEW: This is removed in favour of LocaleModel.all.pluck(:locale)
-          self.select(:locale).distinct.pluck(:locale).compact
         end
 
         def by_preference(key, locales)
