@@ -289,13 +289,19 @@ describe I18nLite::Backend::DB do
   end
 
   context 'meta' do
-    skip 'returns meta data of associated locale object' do
+    it 'returns meta data of associated locale object' do
       locale_object = TestLocale.create(locale: :system, font: 'Verdana')
 
-      expect(I18n.backend.meta(:system)).to eq locale_object.meta
+      expect(I18n.backend.meta(:system)).to include(
+        'locale' => 'system',
+        'font'   => 'Verdana',
+        'ltr'    => true,
+        'rtl'    => false,
+        'direction' => 'LTR',
+      )
     end
 
-    skip 'returns nothing if no meta object is found' do
+    it 'returns nothing if no meta object is found' do
       expect(I18n.backend.meta(:whatever)).to eq({})
     end
 

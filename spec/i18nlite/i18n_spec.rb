@@ -16,7 +16,7 @@ describe I18n do
 
   describe 'meta' do
     context 'with other backend' do
-      skip 'returns empty hash' do
+      it 'returns empty hash' do
         expect(I18n.meta).to eq({})
       end
     end
@@ -38,12 +38,18 @@ describe I18n do
         I18n.locale  = @locale
       end
 
-      skip 'returns meta property of associated LocaleModel object' do
+      it 'returns meta property of associated LocaleModel object' do
         locale_object = TestLocale.create(locale: I18n.locale, font: 'Arial', rtl: true)
-        expect(I18n.meta).to eq locale_object.meta
+        expect(I18n.meta).to include(
+          'locale' => I18n.locale.to_s,
+          'font' => 'Arial',
+          'rtl' => true,
+          'ltr' => false,
+          'direction' => 'RTL'
+        )
       end
 
-      skip 'returns empty hash if matching locale is not found' do
+      it 'returns empty hash if matching locale is not found' do
         expect(I18n.meta).to eq({})
       end
     end

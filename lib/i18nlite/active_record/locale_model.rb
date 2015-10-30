@@ -39,7 +39,6 @@ module I18nLite
         #   @translation_model
         # end
 
-        # FIXME: Create scope instead
         def all_locales
           self.select(:locale)
               .order(:locale)

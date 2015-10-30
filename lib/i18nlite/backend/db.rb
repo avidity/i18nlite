@@ -1,4 +1,5 @@
 require 'i18nlite/backend/consistant_cache'
+require 'i18nlite/backend/locale_meta'
 
 module I18nLite
   module Backend
@@ -75,10 +76,12 @@ module I18nLite
 
       def meta(locale)
         begin
-          @locale_model.find_by!(locale: locale).meta
+          locale_instance = @locale_model.find_by!(locale: locale)
         rescue ::ActiveRecord::RecordNotFound
-          {}
+          return {}
         end
+
+        I18nLite::Backend::LocaleMeta.new(locale_instance).to_hash
       end
 
     protected
