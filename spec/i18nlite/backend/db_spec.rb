@@ -27,7 +27,7 @@ describe I18nLite::Backend::DB do
     expect(I18n.backend.model).to be(TestTranslation)
   end
 
-  context "Used as backend" do
+  context "used as backend" do
     it "receives calls via I18n interface" do
       the_key = :'translation.key'
       expect_any_instance_of(I18nLite::Backend::DB).to receive(:lookup).with(anything, the_key, anything, anything)
@@ -161,8 +161,28 @@ describe I18nLite::Backend::DB do
       expect(I18n.t(:'new.key')).to eq('my translation')
     end
 
+    it 'creates locale object as needed' do
+      expect {
+        I18n.backend.store_translations(:system, :'new.key' => 'my translation')
+      }.to change {
+        TestLocale.where(locale: :system).count
+      }.by(1)
+    end
+
+    it 'does not add locale object if it already exists' do
+      TestLocale.create(locale: :system)
+      expect {
+        I18n.backend.store_translations(:system, :'new.key' => 'my translation')
+      }.to_not change {
+        TestLocale.where(locale: :system).count
+      }
+    end
+
     it "can store multiple translations in one call" do
-      I18n.backend.store_translations(:system, :'new.key' => 'my translation', :'other.new.key' => 'my other translation')
+      I18n.backend.store_translations(:system,
+        :'new.key' => 'my translation',
+        :'other.new.key' => 'my other translation'
+      )
       expect(I18n.t(:'new.key')).to eq('my translation')
       expect(I18n.t(:'other.new.key')).to eq('my other translation')
     end

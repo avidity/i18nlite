@@ -42,8 +42,8 @@ module I18nLite
           end
         end
 
-        # Weed out existing translations not in universe
-        @model.insert_or_update(translations)
+        @locale_model.insert_missing(locale)
+        return @model.insert_or_update(translations)
       end
 
       def available_locales
