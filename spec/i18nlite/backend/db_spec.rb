@@ -316,10 +316,9 @@ describe I18nLite::Backend::DB do
                                       .with( subject.meta_cache_key( :system ), any_args )
                                       .once
                                       .and_call_original
-        subject.meta(:system)
-        subject.meta(:system)
+        result = subject.meta(:system)
+        expect( subject.meta(:system) ).to eq result
       end
     end
-
   end
 end
