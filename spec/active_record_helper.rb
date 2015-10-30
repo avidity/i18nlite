@@ -31,6 +31,5 @@ end
 
 class TestTranslation < ActiveRecord::Base
   include I18nLite::ActiveRecord::TranslationModel
-  locale_model TestLocale
 end
 

@@ -9,9 +9,9 @@ module I18nLite
 
       attr_accessor :model
 
-      def initialize(model)
-        @model = model
-        @locale_model = model.locale_model
+      def initialize(options)
+        @model = options.fetch(:translation_model)
+        @locale_model = options.fetch(:locale_model)
         super()
       end
 

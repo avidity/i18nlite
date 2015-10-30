@@ -10,7 +10,10 @@ describe I18nLite::Exporter::XML do
   end
 
   before(:all) do
-    I18n.backend = I18nLite::Backend::DB.new(TestTranslation)
+    I18n.backend = I18nLite::Backend::DB.new(
+      translation_model: TestTranslation,
+      locale_model: TestLocale
+    )
   end
 
   before(:each) do

@@ -242,15 +242,5 @@ describe TestTranslation do
         ])
       }.to raise_error(I18nLite::ActiveRecord::TranslationModel::MultipleLocalesError)
     end
-
-    it 'will create associate locale object if it does not exist' do
-      expect {
-        TestTranslation.insert_or_update([
-          { locale: :system1, key: 'my.key', translation: 'my updated translation' }
-        ])
-      }.to change {
-        TestTranslation.locale_model.count
-      }.by(1)
-    end
   end
 end

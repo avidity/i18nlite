@@ -4,7 +4,12 @@ require "spec_helper"
 describe I18nLite::Importer::SimpleBackend do
 
   let(:locale)   { :target_locale }
-  let(:importer) { I18nLite::Importer::SimpleBackend.new(TestTranslation, :test_locale, locale) }
+  let(:importer) { I18nLite::Importer::SimpleBackend.new(
+                      translation_model: TestTranslation,
+                      locale_model:      TestLocale,
+                      source_locale:     :test_locale,
+                      target_locale:     locale,
+                  ) }
 
   def translation_by_key(key)
     TestTranslation.find_by(key: key, locale: locale)
@@ -17,20 +22,29 @@ describe I18nLite::Importer::SimpleBackend do
   end
 
   context 'initialization' do
-    it 'requires a database model' do
-      importer = I18nLite::Importer::SimpleBackend.new(TestTranslation, :my_src, :my_trg)
-      expect(importer.model).to be TestTranslation
+    let(:options) { {
+      translation_model: TestTranslation,
+      locale_model:      TestLocale,
+      source_locale:     :my_src,
+      target_locale:     :my_trg,
+    } }
+
+    it 'requires a database models' do
+      importer = I18nLite::Importer::SimpleBackend.new(options)
+      expect(importer.translation_model).to be TestTranslation
+      expect(importer.locale_model).to be TestLocale
     end
 
     it 'accepts source and target locales' do
-      importer = I18nLite::Importer::SimpleBackend.new(TestTranslation, :my_src, :my_trg)
+      importer = I18nLite::Importer::SimpleBackend.new(options)
 
       expect(importer.source_locale).to be :my_src
       expect(importer.target_locale).to be :my_trg
     end
 
     it 'sets target locale to I18n.system_locale by default' do
-      importer = I18nLite::Importer::SimpleBackend.new(TestTranslation, :my_src)
+      options.delete(:target_locale)
+      importer = I18nLite::Importer::SimpleBackend.new(options)
 
       expect(importer.source_locale).to be :my_src
       expect(importer.target_locale).to be I18n.system_locale

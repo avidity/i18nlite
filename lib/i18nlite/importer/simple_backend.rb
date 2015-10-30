@@ -5,27 +5,32 @@ module I18nLite
   module Importer
     class SimpleBackend
 
-      attr_accessor :target_locale, :source_locale, :model
+      attr_accessor :target_locale, :source_locale, :translation_model, :locale_model
 
-      def initialize(model, source_locale, target_locale=I18n.system_locale)
-        @model          = model
-        @source_locale  = source_locale
-        @target_locale  = target_locale
+      def initialize(options)
+        @translation_model = options.fetch(:translation_model)
+        @locale_model   = options.fetch(:locale_model)
+        @source_locale  = options.fetch(:source_locale)
+        @target_locale  = options.fetch(:target_locale, I18n.system_locale)
       end
 
       def import!
-        db_backend = I18nLite::Backend::DB.new(@model)
         db_backend.store_translations(@target_locale, load_translations)
       end
 
       def sync!
-        @model.where(locale: @target_locale).destroy_all
-
-        db_backend = I18nLite::Backend::DB.new(@model)
+        @translation_model.where(locale: @target_locale).destroy_all
         db_backend.store_translations(@target_locale, load_translations)
       end
 
       private
+
+      def db_backend
+        I18nLite::Backend::DB.new(
+          translation_model: @translation_model,
+          locale_model: @locale_model,
+        )
+      end
 
       def load_translations
         backend = I18nLite::Backend::SimpleImporter.new
