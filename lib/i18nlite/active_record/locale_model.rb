@@ -5,40 +5,7 @@ module I18nLite
         model.extend ClassMethods
       end
 
-      # def meta
-      #   {
-      #     font: self.font,
-      #     direction: self.direction,
-      #     ltr: self.ltr?,
-      #     rtl: self.rtl?,
-      #   }
-      # end
-      # def ltr=(bool)
-      #   self.rtl = !bool
-      # end
-
-      # def ltr?
-      #   !rtl?
-      # end
-
-      # def direction
-      #   if rtl?
-      #     'RTL'
-      #   else
-      #     'LTR'
-      #   end
-      #end
-
       module ClassMethods
-        # def translation_model(model=nil)
-        #   unless model.nil?
-        #     raise StandardError.new "translation_model already set" if @translation_model
-        #     @translation_model = model
-        #     setup_arel
-        #   end
-        #   @translation_model
-        # end
-
         def all_locales
           self.select(:locale)
               .order(:locale)
