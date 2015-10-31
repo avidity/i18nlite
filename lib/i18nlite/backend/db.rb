@@ -42,8 +42,8 @@ module I18nLite
           end
         end
 
-        # Weed out existing translations not in universe
-        @model.insert_or_update(translations)
+        @locale_model.insert_missing(locale)
+        return @model.insert_or_update(translations)
       end
 
       def available_locales
@@ -75,13 +75,13 @@ module I18nLite
       end
 
       def meta(locale)
-        begin
-          locale_instance = @locale_model.find_by!(locale: locale)
-        rescue ::ActiveRecord::RecordNotFound
-          return {}
+        if I18n.cache_store
+          I18n.cache_store.fetch( meta_cache_key(locale) ) do
+            get_meta(locale)
+          end
+        else
+          get_meta(locale)
         end
-
-        I18nLite::Backend::LocaleMeta.new(locale_instance).to_hash
       end
 
     protected
@@ -123,6 +123,16 @@ module I18nLite
       end
 
     private
+
+      def get_meta(locale)
+        begin
+          locale_instance = @locale_model.find_by!(locale: locale)
+        rescue ::ActiveRecord::RecordNotFound
+          return {}
+        end
+
+        I18nLite::Backend::LocaleMeta.new(locale_instance).to_hash
+      end
 
       def as_array(elements)
         elements.sort { |a, b|

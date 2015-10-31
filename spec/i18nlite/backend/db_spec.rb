@@ -20,14 +20,15 @@ describe I18nLite::Backend::DB do
     I18n.locale  = @original_locale
   end
 
-  it 'should have correct interfaces' do
-    expect(I18n.backend).to be_an(I18n::Backend::Base)
-    expect(I18n.backend).to be_an(I18n::Backend::Flatten)
-    expect(I18n.backend).to be_an(I18nLite::Backend::ConsistentCache)
-    expect(I18n.backend.model).to be(TestTranslation)
-  end
+  subject { I18n.backend }
 
-  context "Used as backend" do
+  it { is_expected.to be_a I18n::Backend::Base }
+  it { is_expected.to be_a I18n::Backend::Flatten }
+  it { is_expected.to be_a I18nLite::Backend::ConsistentCache }
+  it { is_expected.to have_attributes( locale_model: TestLocale ) }
+  it { is_expected.to have_attributes( model: TestTranslation ) }
+
+  context "used as backend" do
     it "receives calls via I18n interface" do
       the_key = :'translation.key'
       expect_any_instance_of(I18nLite::Backend::DB).to receive(:lookup).with(anything, the_key, anything, anything)
@@ -161,8 +162,28 @@ describe I18nLite::Backend::DB do
       expect(I18n.t(:'new.key')).to eq('my translation')
     end
 
+    it 'creates locale object as needed' do
+      expect {
+        I18n.backend.store_translations(:system, :'new.key' => 'my translation')
+      }.to change {
+        TestLocale.where(locale: :system).count
+      }.by(1)
+    end
+
+    it 'does not add locale object if it already exists' do
+      TestLocale.create(locale: :system)
+      expect {
+        I18n.backend.store_translations(:system, :'new.key' => 'my translation')
+      }.to_not change {
+        TestLocale.where(locale: :system).count
+      }
+    end
+
     it "can store multiple translations in one call" do
-      I18n.backend.store_translations(:system, :'new.key' => 'my translation', :'other.new.key' => 'my other translation')
+      I18n.backend.store_translations(:system,
+        :'new.key' => 'my translation',
+        :'other.new.key' => 'my other translation'
+      )
       expect(I18n.t(:'new.key')).to eq('my translation')
       expect(I18n.t(:'other.new.key')).to eq('my other translation')
     end
@@ -305,5 +326,19 @@ describe I18nLite::Backend::DB do
       expect(I18n.backend.meta(:whatever)).to eq({})
     end
 
+    context 'when a cache store is set' do
+      before(:each) do
+        allow(I18n).to receive(:cache_store).and_return ActiveSupport::Cache::MemoryStore.new
+      end
+
+      it 'caches using locale' do
+        expect(I18n.cache_store).to receive(:write)
+                                      .with( subject.meta_cache_key( :system ), any_args )
+                                      .once
+                                      .and_call_original
+        result = subject.meta(:system)
+        expect( subject.meta(:system) ).to eq result
+      end
+    end
   end
 end
