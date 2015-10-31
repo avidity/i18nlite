@@ -193,16 +193,6 @@ describe I18nLite::Importer::XML do
       }.to raise_error I18nLite::Importer::TextDirectionError
     end
 
-    it 'imports elements matching all matching attributes' do
-      importer = I18nLite::Importer::XML.new(xml(:meta_two_locales))
-
-      expect {
-        importer.import!
-      }.to change {
-        I18n.backend.locale_model.count
-      }.by(2)
-    end
-
     it 'populates attributes with sub elements' do
       importer = I18nLite::Importer::XML.new(xml(:meta_attrs))
       importer.import!
@@ -223,12 +213,33 @@ describe I18nLite::Importer::XML do
       }.to raise_error I18nLite::Importer::UnknonwLocaleAttribute
     end
 
-    it 'cannot use XML to execute arbirary method' do
+    it 'cannot use XML to execute arbitrary method' do
       importer = I18nLite::Importer::XML.new(xml(:meta_injection_attack))
 
       expect {
         importer.import!
       }.to raise_error I18nLite::Importer::UnknonwLocaleAttribute
+    end
+
+    it 'imports elements matching all matching attributes' do
+      importer = I18nLite::Importer::XML.new(xml(:meta_two_locales))
+
+      expect {
+        importer.import!
+      }.to change {
+        TestLocale.count
+      }.by(2)
+    end
+
+    it 'ignores locales section if backend does not support it' do
+      I18n.backend = @backend
+      importer = I18nLite::Importer::XML.new(xml(:meta_two_locales))
+
+      expect {
+        importer.import!
+      }.to_not change {
+        TestLocale.count
+      }
     end
   end
 
