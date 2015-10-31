@@ -153,7 +153,6 @@ module I18nLite
     class XMLLocales
       def initialize(builder)
         @builder = builder
-        #@meta_lookup = {}
       end
 
       def add(locales)
@@ -172,15 +171,16 @@ module I18nLite
       private
 
       def get_meta(locale, locales)
-        if @meta_lookup.nil?
-          @meta_lookup = {}
-          I18nLite.backend.locale_model.where(locale: locales).each do |l|
-            @meta_lookup[l.locale.to_sym] = l
-          end
-        end
+        @meta_lookup ||= init_meta_lookup(locales)
         @meta_lookup.fetch(locale) do
-          I18nLite.backend.locale_model.new
+          I18n.backend.locale_model.new
         end
+      end
+
+      def init_meta_lookup(locales)
+        Hash[I18n.backend.locale_model.where(locale: locales).map {|l|
+          [l.locale.to_sym, l]
+        }]
       end
     end
 

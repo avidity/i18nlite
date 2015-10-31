@@ -124,6 +124,35 @@ describe I18nLite::Exporter::XML do
     end
   end
 
+  context '//locale' do
+    let(:xml) { exporter.export }
+
+    before(:each) do
+      I18n.backend.locale_model.create(
+        locale: 'sv',
+        font: 'Arial',
+        name: 'svenska',
+        rtl: true,  # just testing!
+      )
+    end
+
+    it 'specfies locale code as attribute' do
+      expect(xml).to have_xml('//locales/locale[@code="sv"]')
+    end
+
+    it 'contains locale properties' do
+      expect(xml).to have_xml('//locales/locale[@code="sv"]/dir', 'rtl')
+      expect(xml).to have_xml('//locales/locale[@code="sv"]/font', 'Arial')
+      expect(xml).to have_xml('//locales/locale[@code="sv"]/name', 'svenska')
+    end
+
+    it 'includes empty locale entries when meta data is missing' do
+      expect(xml).to have_xml('//locales/locale[@code="pt"]/dir', 'ltr')
+      expect(xml).to have_xml('//locales/locale[@code="pt"]/font', '')
+      expect(xml).to have_xml('//locales/locale[@code="pt"]/name', '')
+    end
+  end
+
   context '//strings' do
     it 'export includes each locale separately' do
       exporter.locales = [:en, :sv]
