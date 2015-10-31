@@ -3,7 +3,10 @@ require 'nokogiri'
 module I18nLite
   module Importer
     class XML
+      attr_accessor :imported
+
       def initialize(xml)
+        @imported = {}
         @doc = Nokogiri::XML(xml) { |c|
           c.strict
         }
@@ -12,15 +15,24 @@ module I18nLite
       end
 
       def import!
-        imported = {}
+        import_locale_meta if I18n.backend.kind_of? I18nLite::Backend::DB
+        import_translations
 
+        imported
+      end
+
+
+      def import_translations
         @doc.xpath("//strings").each do |element|
           locale = element.attribute('locale').value.downcase
-
-          imported[locale] = import_locale(locale, element.xpath('./string'))
+          import_translation_elements(locale, element.xpath('./string'))
         end
+      end
 
-        return imported
+      def import_locale_meta
+        @doc.xpath('//locales/locale').each do |element|
+          import_meta_element(element)
+        end
       end
 
       private
@@ -32,11 +44,33 @@ module I18nLite
         raise XMLFormatError.new('strings tag requires locale attribute') if @doc.xpath('//strings[not(@locale)]').count > 0
         raise XMLFormatError.new('string tag requires key attribute') if @doc.xpath('//string[not(@key)]').count > 0
         raise XMLFormatError.new('string tag at least one translation child') if @doc.xpath('//string[not(translation)]').count > 0
+
+        if @doc.xpath('//locales/locale').count > 0
+          raise XMLFormatError.new('locale element requires code attribute') if @doc.xpath('//locale[not(@code)]').count > 0
+        end
+
         true
       end
 
-      def import_locale(locale, elements)
+      def import_meta_element(element)
+        locale = I18n.backend.locale_model.new
+        locale.locale = element.attribute('code').value
 
+        if dir = element.xpath('./dir/text()').to_s
+          raise TextDirectionError.new("unknown text direction #{dir}") unless dir =~ /^(rtl|ltr|)$/i
+          locale.rtl = dir.downcase == 'rtl'
+        end
+
+        element.element_children.each do |child|
+          next if child.name == 'dir'
+          raise UnknonwLocaleAttribute.new(child.name) unless locale.has_attribute?(child.name)
+          locale.send(:"#{child.name}=", child.content)
+        end
+
+        locale.save!
+      end
+
+      def import_translation_elements(locale, elements)
         translations = {}
 
         elements.each do |element|
@@ -62,19 +96,16 @@ module I18nLite
           translations[key] = translation
         end
 
-        I18n.backend.store_translations(locale, translations)
+        @imported[locale] = I18n.backend.store_translations(locale, translations)
       end
     end
 
 
-    class Error < Exception
-    end
-
-    class XMLFormatError < Error
-    end
-
-    class ReferenceMismatchError < Error
-    end
+    class Error < StandardError; end
+    class TextDirectionError < Error; end
+    class UnknonwLocaleAttribute < Error; end
+    class XMLFormatError < Error; end
+    class ReferenceMismatchError < Error; end
   end
 end
 
