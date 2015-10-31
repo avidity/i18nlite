@@ -8,7 +8,7 @@ module I18nLite
       include I18n::Backend::Flatten
       include I18nLite::Backend::ConsistentCache
 
-      attr_accessor :model
+      attr_accessor :model, :locale_model
 
       def initialize(options)
         @model = options.fetch(:translation_model)

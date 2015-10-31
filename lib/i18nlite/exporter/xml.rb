@@ -10,7 +10,6 @@ module I18nLite
       attr_accessor :version, :ref_locale, :locales
 
       def initialize
-        @references = {}
       end
 
       def version
@@ -29,12 +28,7 @@ module I18nLite
         @locales = Array(locales).map(&:to_sym)
       end
 
-      def include_reference?(locale)
-        return false if locale == ref_locale
-        return true
-      end
-
-      def export(dataset_name=:existing)
+      def export(dataset_type=:existing)
         diff = (locales + [ref_locale]) - (I18n.available_locales + [I18n.system_locale])
         unless diff.empty?
           raise I18nLite::Exporter::UnknownLocaleError.new(diff.join(', '))
@@ -42,34 +36,14 @@ module I18nLite
 
         builder = Nokogiri::XML::Builder.new do |xml|
           xml.i18n(generated: get_date, version: version) {
-            locales.each do |locale|
 
-              attrs = { locale: locale }
-              attrs[:'reference-locale'] = ref_locale if include_reference? locale
+            I18nLite::Exporter::XMLLocales
+              .new(xml)
+              .add( locales )
 
-              xml.strings(attrs) {
-
-                dataset(dataset_name, locale).order(:key).each do |translation|
-                  next if translation.key =~ /\.\d+$/  # Skip root array elements
-
-                  if include_reference? locale
-                    ref_translation = get_reference(translation.key) or next  # Skip if there's no reference locale
-                  end
-
-                  xml.string(key: translation.key) {
-                    translation.translation = '' if dataset_name == :untranslated
-
-                    add_translation(translation, xml)
-
-                    if ref_translation.present?
-                      xml.reference {
-                        add_translation(ref_translation, xml)
-                      }
-                    end
-                  }
-                end
-              }
-            end
+            I18nLite::Exporter::XMLTranslations
+              .new(xml, ref_locale, dataset_type)
+              .add( locales )
           }
         end
 
@@ -78,42 +52,92 @@ module I18nLite
 
       private
 
-      def dataset(name, locale)
-        raise UnknownDatasetError.new(name) unless [:untranslated, :existing].include?(name)
-        I18n.backend.model.send(name, locale)
-      end
-
       def get_date
         DateTime.now.iso8601
       end
+    end
 
-      def add_translation(translation, xml)
+
+    class XMLTranslations
+      def initialize(builder, ref_locale, dataset_type)
+        unless [:untranslated, :existing].include? dataset_type
+          raise UnknownDatasetError.new(dataset_type)
+        end
+
+        @builder = builder
+        @ref_locale = ref_locale
+        @dataset_type = dataset_type
+        @references = {}
+      end
+
+      def add(locales)
+        locales.each do |locale|
+
+          attrs = { locale: locale }
+          attrs[:'reference-locale'] = @ref_locale if include_reference? locale
+
+          @builder.strings(attrs) {
+
+            dataset(locale).order(:key).each do |translation|
+              next if translation.key =~ /\.\d+$/  # Skip root array elements
+
+              if include_reference? locale
+                ref_translation = get_reference(translation.key) or next  # Skip if there's no reference locale
+              end
+
+              @builder.string(key: translation.key) {
+                translation.translation = '' if @dataset_type == :untranslated
+
+                add_translation(translation)
+
+                if ref_translation.present?
+                  @builder.reference {
+                    add_translation(ref_translation)
+                  }
+                end
+              }
+            end
+          }
+        end
+      end
+
+      private
+
+      def include_reference?(locale)
+        locale != @ref_locale
+      end
+
+      def dataset(locale)
+        I18n.backend.model.send(@dataset_type, locale)
+      end
+
+      def add_translation(translation)
         if translation.is_array
           I18n.backend.model.by_prefix(translation.key, translation.locale).sort {
             |element_a, element_b|
             index_from_key(element_a.key) <=> index_from_key(element_b.key)
           }.each {
             |element|
-            add_content(element, xml)
+            add_content(element)
           }
         else
-          add_content(translation, xml)
+          add_content(translation)
         end
       end
 
-      def add_content(translation, xml)
-        xml.translation {
+      def add_content(translation)
+        @builder.translation {
           if translation.translation.present?
-            xml.cdata translation.translation
+            @builder.cdata translation.translation
           else
-            xml.text ''
+            @builder.text ''
           end
         }
       end
 
       def get_reference(key)
         if @references.empty?
-          I18n.backend.model.where(locale: ref_locale).each {|ref|
+          I18n.backend.model.where(locale: @ref_locale).each {|ref|
             @references[ref.key] = ref
           }
         end
@@ -122,6 +146,41 @@ module I18nLite
 
       def index_from_key(key)
         key[key.rindex(".") + 1..-1].to_i
+      end
+
+    end
+
+    class XMLLocales
+      def initialize(builder)
+        @builder = builder
+        #@meta_lookup = {}
+      end
+
+      def add(locales)
+        @builder.locales {
+          locales.each do |locale|
+            meta = get_meta(locale, locales)
+            @builder.locale(code: locale) {
+              @builder.dir (meta.rtl?) ? 'rtl' : 'ltr'
+              @builder.font meta.font
+              @builder.name meta.name
+            }
+          end
+        }
+      end
+
+      private
+
+      def get_meta(locale, locales)
+        if @meta_lookup.nil?
+          @meta_lookup = {}
+          I18nLite.backend.locale_model.where(locale: locales).each do |l|
+            @meta_lookup[l.locale.to_sym] = l
+          end
+        end
+        @meta_lookup.fetch(locale) do
+          I18nLite.backend.locale_model.new
+        end
       end
     end
 
@@ -140,6 +199,13 @@ end
 #
 # <?xml version="1.0" encoding="utf-8"?>
 # <i18n generated="2014-05-17T13:10Z+02:00" version="v2.15">
+#   <locales>
+#     <locale code="sv">
+#       <dir>ltr</dir>
+#       <font>Arial</font>
+#       <name>Svenska</name>
+#     </locale>
+#   </locales>
 #   <strings locale="sv" reference-locale="system">
 #     <string key="date.day_names">
 #       <translation>Söndag</translation>
