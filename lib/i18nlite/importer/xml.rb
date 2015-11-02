@@ -103,7 +103,7 @@ module I18nLite
 
     class Error < StandardError; end
     class TextDirectionError < Error; end
-    class UnknonwLocaleAttribute < Error; end
+    class UnknownLocaleAttribute < Error; end
     class XMLFormatError < Error; end
     class ReferenceMismatchError < Error; end
   end

@@ -171,7 +171,7 @@ describe I18nLite::Importer::XML do
       expect(I18n.backend.locale_model.count(rtl: true)).to be 1
     end
 
-    it 'allows dir set to rtl' do
+    it 'allows dir set to ltr' do
       importer = I18nLite::Importer::XML.new(xml(:meta_with_ltr))
       importer.import!
 
@@ -210,7 +210,7 @@ describe I18nLite::Importer::XML do
 
       expect {
         importer.import!
-      }.to raise_error I18nLite::Importer::UnknonwLocaleAttribute
+      }.to raise_error I18nLite::Importer::UnknownLocaleAttribute
     end
 
     it 'cannot use XML to execute arbitrary method' do
@@ -218,7 +218,7 @@ describe I18nLite::Importer::XML do
 
       expect {
         importer.import!
-      }.to raise_error I18nLite::Importer::UnknonwLocaleAttribute
+      }.to raise_error I18nLite::Importer::UnknownLocaleAttribute
     end
 
     it 'imports elements matching all matching attributes' do
