@@ -63,7 +63,7 @@ module I18nLite
 
         element.element_children.each do |child|
           next if child.name == 'dir'
-          raise UnknonwLocaleAttribute.new(child.name) unless locale.has_attribute?(child.name)
+          raise UnknownLocaleAttribute.new(child.name) unless locale.has_attribute?(child.name)
           locale.send(:"#{child.name}=", child.content)
         end
 
