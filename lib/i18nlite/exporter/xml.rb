@@ -9,9 +9,6 @@ module I18nLite
 
       attr_accessor :version, :ref_locale, :locales
 
-      def initialize
-      end
-
       def version
         @version ||= "I18nLite v#{I18nLite::VERSION}"
       end
