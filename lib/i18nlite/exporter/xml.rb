@@ -53,7 +53,7 @@ module I18nLite
       private
 
       def get_date
-        DateTime.now.iso8601
+        DateTime.now.utc.iso8601
       end
     end
 
