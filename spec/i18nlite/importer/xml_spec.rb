@@ -35,34 +35,32 @@ describe I18nLite::Importer::XML do
       }.to raise_error(I18nLite::Importer::XMLFormatError)
     end
 
-    it 'strings tags requires a locale' do
+    it 'requires strings tags to have locale attribute' do
       expect {
         I18nLite::Importer::XML.new(xml(:missing_locale))
       }.to raise_error(I18nLite::Importer::XMLFormatError)
     end
 
-    it 'string tags requires a key' do
+    it 'requires string tags to have a key attribute' do
       expect {
         I18nLite::Importer::XML.new(xml(:missing_key))
       }.to raise_error(I18nLite::Importer::XMLFormatError)
     end
 
-    it 'string tags requires at least one translation child' do
+    it 'requires string tags to have one translation child' do
       expect {
         I18nLite::Importer::XML.new(xml(:missing_translation))
+      }.to raise_error(I18nLite::Importer::XMLFormatError)
+    end
+
+    it 'requires locale to have a code attribute' do
+      expect {
+        I18nLite::Importer::XML.new(xml(:missing_code_attribute))
       }.to raise_error(I18nLite::Importer::XMLFormatError)
     end
   end
 
   context 'parsing' do
-    it 'imports each locale separately' do
-      importer = I18nLite::Importer::XML.new(xml(:two_locales))
-
-      expect(importer).to receive(:import_locale).with('sv', anything())
-      expect(importer).to receive(:import_locale).with('en', anything())
-      importer.import!
-    end
-
     it 'invokes I18n#store_translations once per locale' do
       importer = I18nLite::Importer::XML.new(xml(:three_strings))
 
@@ -70,7 +68,7 @@ describe I18nLite::Importer::XML do
         'site.welcome' => 'Välkommen',
         'site.bye' => 'Hejdå',
         'site.welcome_back' => 'Välkommen tillbaka'
-      })
+      }).once
       importer.import!
     end
 
@@ -149,17 +147,123 @@ describe I18nLite::Importer::XML do
     end
   end
 
-  context 'returns' do
-    it 'a hash with imported locales and numbers' do
-      importer = I18nLite::Importer::XML.new(xml(:two_locales))
+  context 'importing locales meta' do
+    before(:each) do
+      @original_backend = I18n.backend
+      @original_locale  = I18n.locale
 
-      expect(importer).to receive(:import_locale).with('sv', anything()).and_return(10)
-      expect(importer).to receive(:import_locale).with('en', anything()).and_return(5)
+      I18n.backend = I18nLite::Backend::DB.new(
+        translation_model: TestTranslation,
+        locale_model: TestLocale
+      )
+      I18n.locale = :system
+    end
 
-      expect(importer.import!).to eq({
+    after(:each) do
+      I18n.backend = @original_backend
+      I18n.locale  = @original_locale
+    end
+
+    it 'allows dir set to rtl' do
+      importer = I18nLite::Importer::XML.new(xml(:meta_with_rtl))
+      importer.import!
+
+      expect(I18n.backend.locale_model.count(rtl: true)).to be 1
+    end
+
+    it 'allows dir set to ltr' do
+      importer = I18nLite::Importer::XML.new(xml(:meta_with_ltr))
+      importer.import!
+
+      expect(I18n.backend.locale_model.count(rtl: false)).to be 1
+    end
+
+    it 'ignores case for dir element value' do
+      importer = I18nLite::Importer::XML.new(xml(:meta_with_upcase_rtl))
+      importer.import!
+
+      expect(I18n.backend.locale_model.count(rtl: true)).to be 1
+    end
+
+    it 'does not allow other dir value' do
+      importer = I18nLite::Importer::XML.new(xml(:meta_with_bad_dir))
+
+      expect {
+        importer.import!
+      }.to raise_error I18nLite::Importer::TextDirectionError
+    end
+
+    it 'populates attributes with sub elements' do
+      importer = I18nLite::Importer::XML.new(xml(:meta_attrs))
+      importer.import!
+
+      meta = I18n.backend.locale_model.find_by(locale: 'sv')
+      expect(meta).to have_attributes(
+        font: 'Verdana',
+        name: 'svenska',
+        rtl: false
+      )
+    end
+
+    it 'fails if encountering element not present in locale model' do
+      importer = I18nLite::Importer::XML.new(xml(:meta_bad_attrs))
+
+      expect {
+        importer.import!
+      }.to raise_error I18nLite::Importer::UnknownLocaleAttribute
+    end
+
+    it 'cannot use XML to execute arbitrary method' do
+      importer = I18nLite::Importer::XML.new(xml(:meta_injection_attack))
+
+      expect {
+        importer.import!
+      }.to raise_error I18nLite::Importer::UnknownLocaleAttribute
+    end
+
+    it 'imports elements matching all matching attributes' do
+      importer = I18nLite::Importer::XML.new(xml(:meta_two_locales))
+
+      expect {
+        importer.import!
+      }.to change {
+        TestLocale.count
+      }.by(2)
+    end
+
+    it 'ignores locales section if backend does not support it' do
+      I18n.backend = @backend
+      importer = I18nLite::Importer::XML.new(xml(:meta_two_locales))
+
+      expect {
+        importer.import!
+      }.to_not change {
+        TestLocale.count
+      }
+    end
+  end
+
+  context 'imported attribute' do
+    before(:each) do
+      allow(I18n.backend).to receive(:store_translations).with('sv', anything()).and_return(10)
+      allow(I18n.backend).to receive(:store_translations).with('en', anything()).and_return(5)
+    end
+
+    let(:importer) { I18nLite::Importer::XML.new(xml(:two_locales)) }
+
+    it 'is returned by import!' do
+      expect(importer.import!).to eq(
         'sv' => 10,
         'en' => 5
-      })
+      )
+    end
+
+    it 'is set by import!' do
+      importer.import!
+      expect(importer.imported).to eq(
+        'sv' => 10,
+        'en' => 5
+      )
     end
   end
 end
@@ -248,6 +352,19 @@ eoXML
     missing_locale: <<'eoXML',
       <?xml version="1.0" encoding="utf-8"?>
       <i18n>
+        <strings>
+          <string key="site.welcome">
+            <translation>Välkommen</translation>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    missing_code_attribute: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <locales>
+          <locale></locale>
+        </locales>
         <strings>
           <string key="site.welcome">
             <translation>Välkommen</translation>
@@ -346,6 +463,128 @@ eoXML
       <i18n>
         <strings locale="sv">
           <string key="site.welcome">
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    meta_with_ltr: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <locales>
+          <locale code="sv">
+            <dir>ltr</dir>
+          </locale>
+        </locales>
+        <strings locale="sv">
+          <string key="site.welcome">
+            <translation>Välkommen</translation>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    meta_with_rtl: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <locales>
+          <locale code="sv">
+            <dir>rtl</dir>
+          </locale>
+        </locales>
+        <strings locale="sv">
+          <string key="site.welcome">
+            <translation>Välkommen</translation>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    meta_with_upcase_rtl: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <locales>
+          <locale code="sv">
+            <dir>RTL</dir>
+          </locale>
+        </locales>
+        <strings locale="sv">
+          <string key="site.welcome">
+            <translation>Välkommen</translation>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    meta_with_bad_dir: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <locales>
+          <locale code="sv">
+            <dir>rigtht-to-left</dir>
+          </locale>
+        </locales>
+        <strings locale="sv">
+          <string key="site.welcome">
+            <translation>Välkommen</translation>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    meta_two_locales: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <locales>
+          <locale code="sv"></locale>
+          <locale code="en"></locale>
+        </locales>
+        <strings locale="sv">
+          <string key="site.welcome">
+            <translation>Välkommen</translation>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    meta_attrs: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <locales>
+          <locale code="sv">
+            <dir>ltr</dir>
+            <font>Verdana</font>
+            <name>svenska</name>
+          </locale>
+        </locales>
+        <strings locale="sv">
+          <string key="site.welcome">
+            <translation>Välkommen</translation>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    meta_bad_attrs: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <locales>
+          <locale code="sv">
+            <dir>rtl</dir>
+            <what>ever</what>
+          </locale>
+        </locales>
+        <strings locale="sv">
+          <string key="site.welcome">
+            <translation>Välkommen</translation>
+          </string>
+        </strings>
+      </i18n>
+eoXML
+    meta_injection_attack: <<'eoXML',
+      <?xml version="1.0" encoding="utf-8"?>
+      <i18n>
+        <locales>
+          <locale code="sv">
+            <destroy/>
+          </locale>
+        </locales>
+        <strings locale="sv">
+          <string key="site.welcome">
+            <translation>Välkommen</translation>
           </string>
         </strings>
       </i18n>
