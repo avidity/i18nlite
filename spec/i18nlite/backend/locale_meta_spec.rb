@@ -2,13 +2,7 @@ require "spec_helper"
 
 describe I18nLite::Backend::LocaleMeta do
   let(:locale_model) { TestLocale.new(locale: 'system', font: 'Verdana', rtl: false) }
-  subject { described_class.new(locale_model) }
-
-  context 'initialization' do
-    it 'accepts a AR model mixing in LocaleModel' do
-      expect( subject.model ).to eq locale_model
-    end
-  end
+  subject { described_class.new( locale_model.attributes ) }
 
   context 'text direction implementation' do
     it 'provides rtl? accessor' do
@@ -23,7 +17,7 @@ describe I18nLite::Backend::LocaleMeta do
       it 'is RTL when rtl is set' do
         locale_model.rtl = true
         expect(
-          described_class.new(locale_model).direction
+          described_class.new( locale_model.attributes ).direction
         ).to eq 'RTL'
       end
 
@@ -36,6 +30,20 @@ describe I18nLite::Backend::LocaleMeta do
   end
 
   context 'to_hash' do
+    context 'instantiated with no data' do
+      subject { described_class.new }
+
+      it 'contains all known meta properties if instantiated with no data' do
+        expect( described_class.new.to_hash ).to eq({
+          'direction' => 'LTR',
+          'ltr'  => true,
+          'rtl'  => false,
+          'font' => nil,
+          'name' => nil
+        })
+      end
+    end
+
     it 'contains all direction propreties' do
       expect( subject.to_hash ).to include(
         'direction' => subject.direction,
@@ -47,6 +55,12 @@ describe I18nLite::Backend::LocaleMeta do
     it 'contains font property' do
       expect( subject.to_hash ).to include(
         'font' => locale_model.font,
+      )
+    end
+
+    it 'contains name property' do
+      expect( subject.to_hash ).to include(
+        'name' => locale_model.name,
       )
     end
   end

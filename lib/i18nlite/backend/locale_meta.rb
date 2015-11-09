@@ -1,21 +1,15 @@
 module I18nLite
   module Backend
-    class LocaleMeta
-      attr_accessor :model
+    class LocaleMeta < Hash
 
-      def initialize(model)
-        @model = model
-      end
-
-      def to_hash
-        @model.attributes.merge(
-          'direction' => self.direction,
-          'ltr'       => self.ltr?
-        )
+      def method_missing(prop, *args)
+        self.fetch(prop.to_s) do
+          super
+        end
       end
 
       def direction
-        if @model.rtl?
+        if self.rtl?
           'RTL'
         else
           'LTR'
@@ -23,7 +17,7 @@ module I18nLite
       end
 
       def rtl?
-        @model.rtl?
+        self.fetch('rtl', false)
       end
 
       def ltr?
