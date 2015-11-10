@@ -2,11 +2,19 @@ require "spec_helper"
 
 describe I18nLite::Backend::LocaleMeta do
   let(:locale_model) { TestLocale.new(locale: 'system', font: 'Verdana', rtl: false) }
-  subject { described_class.new(locale_model) }
+  subject { described_class.new.merge! locale_model.attributes }
 
-  context 'initialization' do
-    it 'accepts a AR model mixing in LocaleModel' do
-      expect( subject.model ).to eq locale_model
+  it { is_expected.to be_a Hash }
+
+  context 'accessors' do
+    it 'is generated for elements in the hash' do
+      expect(subject).to respond_to(:locale, :font, :rtl)
+    end
+
+    it 'for other methods are not generated' do
+      expect {
+        subject.bananas
+      }.to raise_error NoMethodError
     end
   end
 
@@ -20,34 +28,16 @@ describe I18nLite::Backend::LocaleMeta do
     end
 
     context 'provides HTML fiendly direction accessor' do
+
       it 'is RTL when rtl is set' do
         locale_model.rtl = true
-        expect(
-          described_class.new(locale_model).direction
-        ).to eq 'RTL'
+        expect(subject.direction).to eq 'rtl'
       end
 
       it 'is LTR when rtl is not set' do
         locale_model.rtl = false
-        expect( subject.ltr? ).to be true
-        expect( subject.direction ).to eq 'LTR'
+        expect(subject.direction).to eq 'ltr'
       end
-    end
-  end
-
-  context 'to_hash' do
-    it 'contains all direction propreties' do
-      expect( subject.to_hash ).to include(
-        'direction' => subject.direction,
-        'rtl'       => locale_model.rtl?,
-        'ltr'       => subject.ltr?,
-      )
-    end
-
-    it 'contains font property' do
-      expect( subject.to_hash ).to include(
-        'font' => locale_model.font,
-      )
     end
   end
 end

@@ -25,7 +25,7 @@ module I18n
       if I18n.backend.kind_of? I18nLite::Backend::DB
         I18n.backend.meta(I18n.locale)
       else
-        {}
+        I18nLite::Backend::LocaleMeta.new
       end
     end
 

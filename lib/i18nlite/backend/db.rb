@@ -75,12 +75,13 @@ module I18nLite
       end
 
       def meta(locale)
+
         if I18n.cache_store
           I18n.cache_store.fetch( meta_cache_key(locale) ) do
-            get_meta(locale)
+            get_meta_from_db( locale )
           end
         else
-          get_meta(locale)
+          get_meta_from_db( locale )
         end
       end
 
@@ -124,14 +125,14 @@ module I18nLite
 
     private
 
-      def get_meta(locale)
+      def get_meta_from_db(locale)
         begin
-          locale_instance = @locale_model.find_by!(locale: locale)
+          record = @locale_model.find_by!(locale: locale)
         rescue ::ActiveRecord::RecordNotFound
-          return {}
+          return I18nLite::Backend::LocaleMeta.new
         end
 
-        I18nLite::Backend::LocaleMeta.new(locale_instance).to_hash
+        I18nLite::Backend::LocaleMeta.new.merge! record.attributes
       end
 
       def as_array(elements)
