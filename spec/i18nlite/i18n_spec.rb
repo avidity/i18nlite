@@ -15,13 +15,18 @@ describe I18n do
   end
 
   describe 'meta' do
+    subject { I18n.meta }
+
     context 'with other backend' do
-      it 'returns empty hash' do
-        expect(I18n.meta).to eq({})
-      end
+      it { is_expected.to be_kind_of I18nLite::Backend::LocaleMeta }
+      it { is_expected.to be_empty }
     end
 
     context 'with I18Lite::Backend::DB' do
+      let(:locale_model) {
+        TestLocale.create(locale: I18n.locale, font: 'Arial', rtl: true)
+      }
+
       before(:each) do
         @backend = I18n.backend
         @locale  = I18n.locale
@@ -31,6 +36,7 @@ describe I18n do
           locale_model: TestLocale
         )
         I18n.locale = :dummy
+        locale_model
       end
 
       after(:each) do
@@ -38,19 +44,16 @@ describe I18n do
         I18n.locale  = @locale
       end
 
-      it 'returns meta property of associated LocaleModel object' do
-        locale_object = TestLocale.create(locale: I18n.locale, font: 'Arial', rtl: true)
-        expect(I18n.meta).to include(
-          'locale' => I18n.locale.to_s,
-          'font' => 'Arial',
-          'rtl' => true,
-          'ltr' => false,
-          'direction' => 'RTL'
-        )
-      end
+      it { is_expected.to be_kind_of I18nLite::Backend::LocaleMeta }
+      it { is_expected.to include(
+        'locale' => I18n.locale.to_s,
+        'font' => 'Arial',
+        'rtl' => true,
+      ) }
 
       it 'returns empty hash if matching locale is not found' do
-        expect(I18n.meta).to eq({})
+        locale_model.destroy
+        expect(subject).to be_empty
       end
     end
   end

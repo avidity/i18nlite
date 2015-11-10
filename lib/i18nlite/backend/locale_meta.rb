@@ -2,6 +2,11 @@ module I18nLite
   module Backend
     class LocaleMeta < Hash
 
+      def respond_to?(prop, *args)
+        return true if self.has_key? prop.to_s
+        super
+      end
+
       def method_missing(prop, *args)
         self.fetch(prop.to_s) do
           super
@@ -10,9 +15,9 @@ module I18nLite
 
       def direction
         if self.rtl?
-          'RTL'
+          'rtl'
         else
-          'LTR'
+          'ltr'
         end
       end
 

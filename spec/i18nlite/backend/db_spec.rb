@@ -310,15 +310,18 @@ describe I18nLite::Backend::DB do
   end
 
   context 'meta' do
+
+    it 'it returns an I18nLite::Backend::LocaleMeta' do
+      expect(I18n.backend.meta(:system)).to be_kind_of I18nLite::Backend::LocaleMeta
+    end
+
     it 'returns meta data of associated locale object' do
       locale_object = TestLocale.create(locale: :system, font: 'Verdana')
 
       expect(I18n.backend.meta(:system)).to include(
         'locale' => 'system',
         'font'   => 'Verdana',
-        'ltr'    => true,
         'rtl'    => false,
-        'direction' => 'LTR',
       )
     end
 
