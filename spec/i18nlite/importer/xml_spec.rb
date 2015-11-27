@@ -241,6 +241,17 @@ describe I18nLite::Importer::XML do
         TestLocale.count
       }
     end
+
+    it 'updates existing locale' do
+      importer = I18nLite::Importer::XML.new(xml(:meta_with_rtl))
+      locale_record = I18n.backend.locale_model.create(locale: 'sv', rtl: false)
+
+      expect {
+        importer.import!
+      }.to change {
+        locale_record.reload.rtl
+      }.from(false).to(true)
+    end
   end
 
   context 'imported attribute' do

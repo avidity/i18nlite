@@ -53,8 +53,8 @@ module I18nLite
       end
 
       def import_meta_element(element)
-        locale = I18n.backend.locale_model.new
-        locale.locale = element.attribute('code').value
+        code = element.attribute('code').value
+        locale = I18n.backend.locale_model.find_or_create_by(locale: code)
 
         if dir = element.xpath('./dir/text()').to_s
           raise TextDirectionError.new("unknown text direction #{dir}") unless dir =~ /^(rtl|ltr|)$/i
