@@ -17,8 +17,8 @@ Gem::Specification.new do |s|
   s.test_files = Dir["test/**/*"]
 
   s.add_dependency "rails", "~>4.1"
-  s.add_dependency 'nokogiri', '~>1.5'
-  s.add_dependency 'murmurhash3', '~>0.1.3'
+  s.add_dependency 'nokogiri', '1.6.7.2'
+  s.add_dependency 'murmurhash3', '0.1.6'
 
   s.add_development_dependency 'pg', '0.17.1'
   s.add_development_dependency 'rspec-rails', '3.3'
