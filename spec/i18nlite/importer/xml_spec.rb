@@ -168,21 +168,21 @@ describe I18nLite::Importer::XML do
       importer = I18nLite::Importer::XML.new(xml(:meta_with_rtl))
       importer.import!
 
-      expect(I18n.backend.locale_model.count(rtl: true)).to be 1
+      expect(I18n.backend.locale_model.where(rtl: true).count).to be 1
     end
 
     it 'allows dir set to ltr' do
       importer = I18nLite::Importer::XML.new(xml(:meta_with_ltr))
       importer.import!
 
-      expect(I18n.backend.locale_model.count(rtl: false)).to be 1
+      expect(I18n.backend.locale_model.where(rtl: false).count).to be 1
     end
 
     it 'ignores case for dir element value' do
       importer = I18nLite::Importer::XML.new(xml(:meta_with_upcase_rtl))
       importer.import!
 
-      expect(I18n.backend.locale_model.count(rtl: true)).to be 1
+      expect(I18n.backend.locale_model.where(rtl: true).count).to be 1
     end
 
     it 'does not allow other dir value' do
