@@ -50,13 +50,15 @@ module I18nLite
         def by_prefix_and_preference(key, locales)
           return by_prefix(key, locales.first) if locales.size == 1
 
-          find_by_sql(coalece_query(locales, key_like: key))
+          q = coalesce_query(locales, key_like: key)
+          find_by_sql([q.query, q.params])
         end
 
         def by_preference(key, locales)
           return find_by(key: key, locale: locales.first) if locales.size == 1
 
-          result = find_by_sql(coalece_query(locales, key: key))
+          q = coalesce_query(locales, key: key)
+          result = find_by_sql([q.query, q.params])
           return (result.size) ? result.first : nil
         end
 
@@ -67,13 +69,13 @@ module I18nLite
         def all_by_preference(locales)
           return find_by(locale: locales.first) || [] if locales.size == 1
 
-          find_by_sql(coalece_query(locales))
+          q = coalesce_query(locales)
+          find_by_sql([q.query, q.params])
         end
 
         def all_by_preference_fast(locales)
-          Hash[*self.connection.select_all(coalece_query(locales)).map! {|h|
-            [h['key'], h['translation']]
-          }.flatten!]
+          q = coalesce_query(locales)
+          Hash[*find_by_sql([q.query, q.params]).pluck(:key, :translation).flatten!]
         end
 
         def trim_to_universe(locale)
@@ -100,11 +102,12 @@ module I18nLite
           }
         end
 
-
-        def coalece_query(locales, options={})
+        def coalesce_query(locales, options={})
 
           # FIXME 1: Require locales to be at least two elements in length'
           # FIXME 2: This method has grown, it should be split up, preferably in a class that manages all the various cases
+
+          param = QueryWithParams.new
 
           tables = 0.upto(locales.size - 1).map {|i| "t_#{i}" }   # Aliases tables, in order of preference
           fallback_table  = tables.last
@@ -113,7 +116,7 @@ module I18nLite
             table   = tables[i]
             locale  = locales[i]
 
-            "LEFT JOIN (SELECT #{self.column_names.join(', ')} FROM #{self.table_name} WHERE locale = '#{locale}')
+            "LEFT JOIN (SELECT #{self.column_names.join(', ')} FROM #{self.table_name} WHERE locale = #{param.insert(locale)})
               AS #{table}
               ON  #{fallback_table}.id <> #{table}.id
               AND #{fallback_table}.key = #{table}.key
@@ -133,17 +136,36 @@ module I18nLite
               key = options[:key]
             end
 
-            key_constraint = " AND #{fallback_table}.key #{key_operator} '#{key}'"
+            key_constraint = " AND #{fallback_table}.key #{key_operator} #{param.insert(key)}"
           end
 
-          "SELECT DISTINCT
+          param.query = "SELECT DISTINCT
             #{coalece_fields.join(",\n")}
           FROM #{self.table_name} #{fallback_table}
             #{joins.join("\n")}
           WHERE
-            #{fallback_table}.locale = '#{fallback_locale}'
+            #{fallback_table}.locale = #{param.insert(fallback_locale)}
             #{key_constraint}
           ORDER BY key"
+
+          param
+        end
+      end
+
+      class QueryWithParams
+        attr_accessor :params, :query
+        def initialize
+          @params = {}
+        end
+
+        def insert(value)
+          key = :"p#{@params.size}"
+          @params[key] = value
+          ":#{key}"
+        end
+
+        def params
+          @params
         end
       end
 
@@ -152,4 +174,3 @@ module I18nLite
     end
   end
 end
-
