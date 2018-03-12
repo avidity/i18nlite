@@ -7,16 +7,16 @@ require "i18nlite/version"
 Gem::Specification.new do |s|
   s.name        = "i18nlite"
   s.version     = I18nLite::VERSION
-  s.authors     = ["Avidity AB"]
-  s.email       = ["code@avidity.se"]
-  s.homepage    = "http://avidity.se"
-  s.summary     = "Summary of I18nLite."
-  s.description = "Description of I18nLite."
+  s.authors     = ["Promote International AB"]
+  s.email       = ["code@promoteint.com"]
+  s.homepage    = "https://promoteint.com"
+  s.summary     = "I18n framework for Rails"
+  s.description = "I18n backend with support for locale inheritance"
 
   s.files = Dir["{app,config,db,lib}/**/*", "Rakefile"]
   s.test_files = Dir["test/**/*"]
 
-  s.add_dependency "rails", '5.0.0'
+  s.add_dependency "rails", ['>= 4.1.16', '<= 5.0.0']
   s.add_dependency 'nokogiri', '1.6.7.2'
   s.add_dependency 'murmurhash3', '0.1.6'
 
