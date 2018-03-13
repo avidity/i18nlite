@@ -13,6 +13,7 @@ pipeline {
       steps {
         sh '''#!/bin/bash -le
           bundle --jobs 4
+          bundle exec appraisal install
           '''
       }
     }
@@ -29,10 +30,9 @@ pipeline {
     stage('Tests') {
       steps {
         sh '''#!/bin/bash -le
-          bundle exec rspec
+          bundle exec appraisal rspec
           '''
       }
     }
   }
 }
-
