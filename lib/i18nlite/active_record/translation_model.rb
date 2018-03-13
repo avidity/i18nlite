@@ -75,7 +75,8 @@ module I18nLite
 
         def all_by_preference_fast(locales)
           q = coalesce_query(locales)
-          Hash[*find_by_sql([q.query, q.params]).pluck(:key, :translation).flatten!]
+          results = find_by_sql([q.query, q.params])
+          Hash[*results.map { |record| [record.key, record.translation] }.flatten!]
         end
 
         def trim_to_universe(locale)
