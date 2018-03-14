@@ -21,7 +21,7 @@ pipeline {
     stage('Database') {
       steps {
         sh '''#!/bin/bash -le
-          dropdb i18nlite_test
+          dropdb i18nlite_test --if-exists
           createdb i18nlite_test
           '''
       }
