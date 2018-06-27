@@ -17,11 +17,11 @@ Gem::Specification.new do |s|
   s.test_files = Dir["test/**/*"]
 
   s.add_dependency "rails", ['>= 4.1.16', '<= 5.0.0']
-  s.add_dependency 'nokogiri', '1.6.7.2'
+  s.add_dependency 'nokogiri', '1.8.3'
   s.add_dependency 'murmurhash3', '0.1.6'
 
   s.add_development_dependency 'pg', '0.18.4'
-  s.add_development_dependency 'rspec-rails', '3.5'
+  s.add_development_dependency 'rspec-rails', '3.7'
   s.add_development_dependency 'database_cleaner', '1.1.1'
   s.add_development_dependency 'simplecov', '0.8.2'
   s.add_development_dependency "appraisal"
