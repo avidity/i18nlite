@@ -1,5 +1,8 @@
 # i18nlite
 
+## Dependencies
+
+https://github.com/thoughtbot/appraisal
 
 ## Testing
 
@@ -8,4 +11,8 @@ The test scripts requires a Postgres connection, and a test database. Before run
 psql < spec/support/init_test_db.sql
 ```
 as a user with ```login``` and ```createdb``` priviliges.
+
+## Releasing
+
+<https://docs.promoteapp.net/promote/development/private-ruby-gem-server.html#publish>
 
