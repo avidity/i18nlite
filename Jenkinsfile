@@ -41,7 +41,7 @@ pipeline {
       }
       steps {
         sh '''#!/bin/bash -le
-          export BUILD_VERSION=$(bundle exec ruby -e 'puts Release::VERSION')
+          export BUILD_VERSION=$(bundle exec ruby -e 'puts I18nLite::VERSION')
           test "v$BUILD_VERSION" = "$TAG_NAME"
           gem build i18nlite.gemspec
           gem push --host https://gems.promoteapp.net/private i18nlite-$BUILD_VERSION.gem --key push_api_key
