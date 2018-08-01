@@ -15,6 +15,7 @@ ActiveRecord::Schema.define do
     t.string :locale
     t.string :translation
     t.boolean :is_array
+    t.timestamps
   end
 
   create_table :test_locales, :force => true do |t|
@@ -32,4 +33,3 @@ end
 class TestTranslation < ActiveRecord::Base
   include I18nLite::ActiveRecord::TranslationModel
 end
-
