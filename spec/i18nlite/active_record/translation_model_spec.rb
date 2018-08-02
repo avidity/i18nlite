@@ -212,11 +212,12 @@ describe TestTranslation do
       expect {
         TestTranslation.insert_or_update([
           { locale: :system, key: 'my.key', translation: 'my other translation' },
-          { locale: :system, key: 'my.new', translation: 'new translation' },
+          { locale: :system, key: 'my.new1', translation: 'new translation 1' },
+          { locale: :system, key: 'my.new2', translation: 'new translation 2' },
         ])
       }.to change {
         TestTranslation.count()
-      }.from(1).to(2)
+      }.from(1).to(3)
     end
 
     it 'updates existing keys for locale' do
@@ -241,6 +242,22 @@ describe TestTranslation do
           { locale: :system2, key: 'my.key', translation: 'my updated translation' }
         ])
       }.to raise_error(I18nLite::ActiveRecord::TranslationModel::MultipleLocalesError)
+    end
+
+    it 'inserts array keys' do
+      expect {
+        TestTranslation.insert_or_update([
+          { locale: :system, key: 'my.key', is_array: true }
+        ])
+      }.to change { TestTranslation.count }.from(0).to(1)
+    end
+
+    it 'sanitizes content' do
+      expect {
+        TestTranslation.insert_or_update([
+          { locale: :system, key: 'my.key', translation: "this mustn't crash" }
+        ])
+      }.to change { TestTranslation.count }.from(0).to(1)
     end
   end
 end

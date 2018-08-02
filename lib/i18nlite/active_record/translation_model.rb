@@ -22,13 +22,11 @@ module I18nLite
             # FIXME: Resolve this somehow:
             #self.locale_model.insert_missing(translations.first[:locale]) if translations.size
 
-            # NOTE: I was under the impression that this statement would be smart an generate
-            # INSERT INTO ... (col1, col2, ...) VALUES
-            #  (row1, row1, ...)
-            #  (row2, row2, ...)
-            # but instead activecrecord just generates multiple inserts. We might want to change that
-            # for performance reasons
-            self.create(to_insert)
+            BulkInsert.new(
+              self.table_name,
+              columns_for_insert,
+              to_insert
+            ).execute unless to_insert.empty?
 
             to_update.each do |t|
               where(
@@ -150,6 +148,10 @@ module I18nLite
           ORDER BY key"
 
           param
+        end
+
+        def columns_for_insert
+          self.column_names - [self.primary_key]
         end
       end
 
