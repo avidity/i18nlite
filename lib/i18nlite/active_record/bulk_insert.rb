@@ -11,13 +11,13 @@ module I18nLite
         ::ActiveRecord::Base.connection.execute(insert_sql)
       end
 
+      private
+
       def insert_sql
         <<-SQL
           INSERT INTO #{@table} #{columns_for_insert} VALUES #{values_for_insert}
         SQL
       end
-
-      private
 
       def columns_for_insert
         "(#{@columns.join(',')})"
