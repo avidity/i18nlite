@@ -52,6 +52,7 @@ GEM
       thor (>= 0.14.0)
     arel (7.1.4)
     builder (3.2.3)
+    bump (0.6.1)
     byebug (9.0.6)
     concurrent-ruby (1.0.5)
     crass (1.0.4)
@@ -147,6 +148,7 @@ PLATFORMS
 
 DEPENDENCIES
   appraisal
+  bump (~> 0.6)
   byebug
   database_cleaner (= 1.1.1)
   i18nlite!
@@ -155,4 +157,4 @@ DEPENDENCIES
   simplecov (= 0.8.2)
 
 BUNDLED WITH
-   1.16.1
+   1.16.6
