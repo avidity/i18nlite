@@ -24,5 +24,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec-rails', '3.7'
   s.add_development_dependency 'database_cleaner', '1.1.1'
   s.add_development_dependency 'simplecov', '0.8.2'
-  s.add_development_dependency "appraisal"
+  s.add_development_dependency 'appraisal'
+  s.add_development_dependency 'bump', '~> 0.6'
 end
