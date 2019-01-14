@@ -4,6 +4,10 @@
 
 https://github.com/thoughtbot/appraisal
 
+```
+bundle exec appraisal install
+```
+
 ## Testing
 
 The test scripts requires a Postgres connection, and a test database. Before running the tests the first time, do
