@@ -14,9 +14,6 @@ pipeline {
         sh '''#!/bin/bash -le
           bundle --jobs 4
           bundle exec appraisal install
-          rbenv shell 2.3.5
-          bundle --jobs 4
-          bundle exec appraisal install
           '''
       }
     }
@@ -33,8 +30,6 @@ pipeline {
     stage('Tests') {
       steps {
         sh '''#!/bin/bash -le
-          bundle exec appraisal rspec
-          rbenv shell 2.3.5
           bundle exec appraisal rspec
           '''
       }
