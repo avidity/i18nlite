@@ -2,9 +2,11 @@ require 'active_record'
 
 ActiveRecord::Base.establish_connection(
   :adapter  => "postgresql",
+  :host     => ENV.fetch('I18NLITE_DB_HOST', 'localhost'),
   :database => ENV.fetch('I18NLITE_DB_NAME', 'i18nlite_test'),
-  :email => ENV.fetch('I18NLITE_DB_USER', 'i18nlite_test'),
+  :username => ENV.fetch('I18NLITE_DB_USER', 'i18nlite_test'),
   :password => ENV.fetch('I18NLITE_DB_PASS', 'i18nlite_test')
+  
 )
 
 ActiveRecord::Schema.define do
@@ -15,7 +17,7 @@ ActiveRecord::Schema.define do
     t.string :locale
     t.string :translation
     t.boolean :is_array
-    t.timestamps
+    t.timestamps null: true
   end
 
   create_table :test_locales, :force => true do |t|
