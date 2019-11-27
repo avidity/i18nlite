@@ -6,6 +6,7 @@ pipeline {
   environment {
     I18NLITE_DB_USER = ""
     I18NLITE_DB_PASS = ""
+    I18NLITE_DB_HOST = ""
   }
 
   stages {

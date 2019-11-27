@@ -3,18 +3,18 @@ module I18nLite
     module TranslationModel
 
       def self.included(model)
-        model.scope :existing, ->(locale) {
-          model.where(locale: locale)
-        }
-
-        model.scope :untranslated, ->(locale) {
-          model.where('locale = ? AND key NOT IN(?)', I18n.system_locale, model.existing(locale).pluck(:key))
-        }
-
         model.extend ClassMethods
       end
 
       module ClassMethods
+        def existing(locale)
+          self.where(locale: locale)
+        end
+
+        def untranslated(locale)
+          self.where('locale = ? AND key NOT IN(?)', I18n.system_locale, self.existing(locale).pluck(:key))
+        end
+
         def insert_or_update(translations)
           to_update, to_insert = partition_on_keys(translations)
 
