@@ -21,3 +21,7 @@ end
 appraise "rails-6.0.2" do
   gem "rails", "6.0.2"
 end
+
+appraise "rails-6.0.3" do
+  gem "rails", "6.0.3"
+end
