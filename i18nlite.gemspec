@@ -16,14 +16,14 @@ Gem::Specification.new do |s|
   s.files = Dir["{app,config,db,lib}/**/*", "Rakefile"]
   s.test_files = Dir["test/**/*"]
 
-  s.add_dependency "rails", ['>= 5.0.0', '<= 6.1']
+  s.add_dependency 'rails', '>= 5.0.0'
   s.add_dependency 'nokogiri', '~> 1.8'
   s.add_dependency 'murmurhash3', '0.1.6'
 
-  s.add_development_dependency 'pg', '0.18.4'
-  s.add_development_dependency 'rspec-rails', '3.7'
-  s.add_development_dependency 'database_cleaner', '1.7.0'
-  s.add_development_dependency 'simplecov', '0.8.2'
+  s.add_development_dependency 'pg'
+  s.add_development_dependency 'rspec-rails'
+  s.add_development_dependency 'database_cleaner'
+  s.add_development_dependency 'simplecov'
   s.add_development_dependency 'appraisal'
-  s.add_development_dependency 'bump', '~> 0.6'
+  s.add_development_dependency 'bump'
 end

@@ -14,14 +14,6 @@ appraise "rails-6.0" do
   gem "rails", "6.0.0"
 end
 
-appraise "rails-6.0.1" do
-  gem "rails", "6.0.1"
-end
-
-appraise "rails-6.0.2" do
-  gem "rails", "6.0.2"
-end
-
-appraise "rails-6.0.3" do
-  gem "rails", "6.0.3"
+appraise "rails-6.1" do
+  gem "rails", "6.1.3"
 end
