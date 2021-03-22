@@ -12,7 +12,7 @@ module I18nLite
       # since we can't insert dynamic content yet
       def load_translations(*filenames)
         filenames = I18n.load_path if filenames.empty?
-        filenames = filenames.flatten.select { |filename| filename.ends_with?('yml', 'yaml') }
+        filenames = filenames.flatten.select { |filename| filename.end_with?('yml', 'yaml') }
         filenames.each { |filename| load_file(filename) }
       end
     end
