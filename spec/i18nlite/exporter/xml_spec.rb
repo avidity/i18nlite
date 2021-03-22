@@ -305,7 +305,7 @@ end
   RSpec::Matchers.define :"have_#{name}" do |*args, text|
 
     path =  "#{args[0]}.#{args[1]}"
-    path << "[#{args[2]}]" if name.to_s.ends_with?('_at')
+    path << "[#{args[2]}]" if name.to_s.end_with?('_at')
     path << "=#{text}"
     desc = if name =~ /reference/
       'reference translation'
