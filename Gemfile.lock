@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    i18nlite (2.5.0)
+    i18nlite (2.5.1)
       murmurhash3 (= 0.1.6)
       nokogiri (~> 1.8)
       rails (>= 7.2.0)

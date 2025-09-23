@@ -86,6 +86,7 @@ module I18nLite
       def self.handles
         %w(
           ActiveSupport::Cache::RedisStore
+          ActiveSupport::Cache::RedisCacheStore
         )
       end
 
