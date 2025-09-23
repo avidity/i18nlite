@@ -2,7 +2,8 @@
 
 source "https://rubygems.org"
 
-gem "rails", "6.0.0"
+gem "rails", "8.0.2"
+gem "pg", "1.6.2"
 
 group :development, :test do
   gem "byebug"
