@@ -1,4 +1,4 @@
-FROM ruby:2.6.5
+FROM ruby:3.4.6
 
 ENV RAILS_VERSION 6.0.1
 ENV I18NLITE_DB_NAME i18nlite_test

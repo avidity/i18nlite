@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   db_i18nlite:
-    image: postgres:9.3
+    image: postgres:17
     volumes:
       - i18nlite_db:/var/lib/postgresql/data
     environment:
