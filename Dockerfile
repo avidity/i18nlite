@@ -1,6 +1,6 @@
 FROM ruby:3.4.6
 
-ENV RAILS_VERSION 6.0.1
+ENV RAILS_VERSION 7.0.2
 ENV I18NLITE_DB_NAME i18nlite_test
 
 RUN apt-get update -qq && apt-get install -y build-essential libpq-dev postgresql-client
