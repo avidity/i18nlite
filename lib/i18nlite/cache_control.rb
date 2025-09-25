@@ -61,13 +61,13 @@ module I18nLite
         @@adaptors ||= {}
         @@adaptors[store.class.to_s.to_sym] ||= (self.subclasses.find do
           |subclass|
-          begin
-            subclass.handles.any? do
-              |supported_store|
+          subclass.handles.any? do
+            |supported_store|
+            begin
               store.instance_of?(supported_store.constantize)
+            rescue NameError
+              false
             end
-          rescue NameError
-            false
           end
         end || self).new
       end

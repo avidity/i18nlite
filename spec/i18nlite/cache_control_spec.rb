@@ -101,6 +101,38 @@ describe I18nLite::KeyedCacheAdaptor::Base do
     end
   end
 
+  context "Redis store" do
+    context 'with Rails 7.1 RedisStore' do
+      before do
+        # It'll run this test if the class doesn't exist (Rails 8+)
+        skip "RedisStore exists in this Rails version" if defined?(
+          ActiveSupport::Cache::RedisStore
+        )
+
+        # Mock the RedisStore class for Rails 8 testing
+        stub_const('ActiveSupport::Cache::RedisStore', Class.new)
+      end
+
+      it 'returns Redis adaptor for RedisStore' do
+        store = ActiveSupport::Cache::RedisStore.new
+
+        expect(subject.adaptor_for(store)).to be_instance_of(
+          I18nLite::KeyedCacheAdaptor::Redis
+        )
+      end
+    end
+
+    context 'with Rails 8 RedisCacheStore' do
+      it 'returns Redis adaptor for RedisCacheStore' do
+        store = ActiveSupport::Cache::RedisCacheStore.new
+
+        expect(subject.adaptor_for(store)).to be_instance_of(
+          I18nLite::KeyedCacheAdaptor::Redis
+        )
+      end
+    end
+  end
+
   context "RegExp store" do
     it "handles MemoryStore" do
       expect(subject.adaptor_for( ActiveSupport::Cache::MemoryStore.new )).to be_instance_of( I18nLite::KeyedCacheAdaptor::RegExp )
