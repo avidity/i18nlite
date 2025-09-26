@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    i18nlite (2.6.0)
+    i18nlite (2.6.1)
       murmurhash3 (= 0.1.6)
       nokogiri (~> 1.8)
       rails (>= 7.2.0)
@@ -209,10 +209,6 @@ GEM
     rdoc (6.14.2)
       erb
       psych (>= 4.0.0)
-    redis (5.4.1)
-      redis-client (>= 0.22.0)
-    redis-client (0.26.0)
-      connection_pool
     reline (0.6.2)
       io-console (~> 0.5)
     rspec-core (3.13.5)
@@ -271,7 +267,6 @@ DEPENDENCIES
   database_cleaner
   i18nlite!
   pg
-  redis
   rspec-rails
   simplecov
 
